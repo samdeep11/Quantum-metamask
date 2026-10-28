@@ -1,69 +1,141 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>QTRUST V2</title>
-<script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>QTRUST V3 - Quantum Wallet</title>
+<script src="https://cdn.jsdelivr.net/npm/ethers@6.13.2/dist/ethers.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.2.0/crypto-js.min.js"></script>
 <style>
-body{max-width:420px;margin:0 auto;background:#020802;color:#00ff88;font-family:monospace;padding:14px}
-.logo{width:80px;height:80px;border:3px solid #00ff88;border-radius:50%;margin:10px auto;display:flex;align-items:center;justify-content:center;font-size:46px;font-weight:900;box-shadow:0 0 25px #00ff8866;position:relative}
-.logo:after,.logo:before{content:'';position:absolute;width:90%;height:38%;border:2px solid #00ff88;border-radius:50%}.logo:after{transform:rotate(45deg)}.logo:before{transform:rotate(-45deg)}
-.box{background:#0a1a0a;border:1px solid #00ff8866;padding:12px;border-radius:12px;margin:10px 0;word-break:break-all;font-size:12px}
-button{width:100%;padding:13px;background:#00ff88;color:#000;border:none;font-weight:900;border-radius:12px;margin:6px 0;cursor:pointer}
-input{width:100%;padding:12px;background:#081208;border:1px solid #00ff88;color:#fff;border-radius:10px;box-sizing:border-box;margin-top:8px}
-.small{font-size:10px;color:#8f8}
-#qrcode{ background:#fff;padding:10px;border-radius:10px;width:150px;margin:10px auto;display:none }
-.hist{max-height:150px;overflow:auto}
-.tag{display:inline-block;background:#00ff8822;border:1px solid #00ff88;padding:2px 6px;border-radius:4px;font-size:10px;margin:2px}
+body{font-family:Inter,system-ui;background:#0a0a0f;color:#fff;display:flex;justify-content:center;align-items:center;min-height:100vh;margin:0}
+.card{background:#15151f;border:1px solid #2a2a3a;border-radius:20px;padding:32px;width:360px;box-shadow:0 20px 60px rgba(0,0,0,0.5)}
+h2{margin:0 0 8px;text-align:center;background:linear-gradient(90deg,#8b5cf6,#3b82f6);-webkit-background-clip:text;-webkit-text-fill-color:transparent;font-size:26px}
+.sub{text-align:center;color:#888;font-size:13px;margin-bottom:24px}
+input{width:100%;padding:14px;background:#0f0f17;border:1px solid #2a2a3a;border-radius:12px;color:#fff;margin-bottom:12px;outline:none;box-sizing:border-box}
+input:focus{border-color:#8b5cf6}
+button{width:100%;padding:14px;border:none;border-radius:12px;font-weight:600;cursor:pointer;margin-bottom:10px}
+.primary{background:linear-gradient(90deg,#8b5cf6,#3b82f6);color:#fff}
+.secondary{background:#232334;color:#aaa}
+.mnemonic{background:#0f0f17;border:1px dashed #3a3a4a;padding:12px;border-radius:12px;font-size:13px;line-height:1.8;margin:12px 0;word-spacing:6px}
+.addr{font-size:12px;color:#8b5cf6;background:#1a1a2e;padding:10px;border-radius:10px;word-break:break-all;text-align:center}
+.hidden{display:none}
+#status{font-size:12px;text-align:center;color:#f87171;min-height:18px}
 </style>
 </head>
 <body>
-<div class="logo">Q</div>
-<h2 style="text-align:center;margin:0">⚛️ QTRUST V2</h2>
-<p style="text-align:center" class="small">QUANTUM TRUST | Chain 20949 | PQC Secure</p>
+<div class="card">
+  <!-- LOGIN -->
+  <div id="loginView">
+    <h2>QTRUST V3</h2>
+    <div class="sub">Quantum Secure Wallet • Chain 20949</div>
+    <input type="password" id="pass" placeholder="Password (min 8 chars)">
+    <input type="password" id="cpass" placeholder="Confirm Password">
+    <div id="status"></div>
+    <button class="primary" id="createBtn">Create / Unlock Wallet</button>
+    <button class="secondary" id="importBtn">Import Wallet</button>
+    <div id="importBox" class="hidden">
+      <input type="text" id="mnemonicInput" placeholder="Enter 12 words seed phrase">
+      <button class="primary" id="doImportBtn">Import Now</button>
+    </div>
+  </div>
 
-<div id="locked">
-<button onclick="createWallet()">✨ Create Wallet</button>
-<button onclick="importWallet()" style="background:#111;color:#00ff88;border:1px solid #00ff88">📥 Import Private Key</button>
-</div>
-
-<div id="unlocked" style="display:none">
-<div class="box">
-Qx: <b id="qxAddr"></b> <span class="tag" onclick="copyQx()">COPY</span><br>
-0x: <span id="ethAddr" class="small"></span><br>
-Bal: <b id="bal" style="font-size:18px"></b> <span id="usd" class="small"></span><br>
-Chain: 20949 | Blocks: <span id="bCount">0</span> | Nonce: <span id="nonce">0</span>
-<div id="qrcode"></div>
-<button onclick="toggleQR()" style="padding:6px;font-size:11px;background:#111;color:#00ff88;border:1px solid #00ff88;margin-top:8px">🔳 Show QR / Hide</button>
-</div>
-
-<input id="to" placeholder="To Qx address (Qx...)">
-<input id="amt" placeholder="Amount QTC">
-<button onclick="send()">⚡ Send QTC</button>
-<button onclick="mine()">⛏️ Mine Block #<span id="bNo">0</span> (+5 QTC)</button>
-<button onclick="lock()" style="background:#222;color:#fff">🔒 Lock</button>
-
-<div class="box hist"><b>📜 Tx History</b><div id="log" class="small"></div></div>
+  <!-- WALLET -->
+  <div id="walletView" class="hidden">
+    <h2>Wallet Unlocked</h2>
+    <div class="sub">Quantum Chain • ID 20949</div>
+    <div class="addr" id="addr"></div>
+    <div class="mnemonic hidden" id="mnemoBox"></div>
+    <button class="secondary" id="showSeedBtn">Show Seed Phrase</button>
+    <button class="primary" id="connectChainBtn">Connect to Chain 20949</button>
+    <button class="secondary" id="lockBtn">Lock Wallet</button>
+    <button class="secondary" id="logoutBtn" style="color:#f87171">Logout & Clear</button>
+  </div>
 </div>
 
 <script>
-let w=null, blocks=JSON.parse(localStorage.getItem('q_blocks')||'[0]'), txs=JSON.parse(localStorage.getItem('q_txs')||'[]'), qr=null;
-function save(){localStorage.setItem('q_wallet',JSON.stringify(w));localStorage.setItem('q_txs',JSON.stringify(txs))}
-function log(m){txs.unshift(new Date().toLocaleTimeString()+" "+m);if(txs.length>20)txs.pop();save();renderLog()}
-function renderLog(){document.getElementById('log').innerHTML=txs.join('<br>')}
-function createWallet(){const e="0x"+[...Array(40)].map(()=>Math.floor(Math.random()*16).toString(16)).join(''),q="Qx"+e.slice(2,12)+Math.random().toString(36).slice(2,18)+"1v";w={qx:q,eth:e,priv:"Q-PRIV-"+e,bal:100,nonce:0};save();unlock();log("Wallet Created: "+q)}
-function unlock(){w=JSON.parse(localStorage.getItem('q_wallet'));if(!w)return;document.getElementById('locked').style.display='none';document.getElementById('unlocked').style.display='block';document.getElementById('qxAddr').innerText=w.qx;document.getElementById('ethAddr').innerText=w.eth;document.getElementById('bal').innerText=w.bal+" QTC";document.getElementById('usd').innerText="≈ $"+(w.bal*0.5).toFixed(2);document.getElementById('bNo').innerText=blocks.length;document.getElementById('bCount').innerText=blocks.length;document.getElementById('nonce').innerText=w.nonce||0;renderLog();makeQR()}
-function makeQR(){document.getElementById('qrcode').innerHTML="";qr=new QRCode(document.getElementById('qrcode'),{text:w.qx,width:140,height:140})}
-function toggleQR(){let q=document.getElementById('qrcode');q.style.display=q.style.display=='none'?'block':'none';if(q.style.display=='none')q.style.display='block';else if(q.style.display=='block'){}; q.style.display = q.style.display=='block'?'none':'block'; // toggle
-if(q.style.display==''||q.style.display=='none'){q.style.display='block'}else{q.style.display='none'}}
-function copyQx(){navigator.clipboard.writeText(w.qx);alert("Copied: "+w.qx)}
-function lock(){localStorage.removeItem('q_wallet');location.reload()}
-function send(){let to=document.getElementById('to').value.trim(),amt=Number(document.getElementById('amt').value);if(!to.startsWith('Qx'))return alert('Qx daal');if(!amt)return alert('Amount');if(w.bal<amt)return alert('Low bal: '+w.bal);w.bal-=amt;w.nonce=(w.nonce||0)+1;save();document.getElementById('bal').innerText=w.bal+' QTC';document.getElementById('usd').innerText="≈ $"+(w.bal*0.5).toFixed(2);document.getElementById('nonce').innerText=w.nonce;log("→ Sent "+amt+" QTC to "+to.slice(0,10)+" | Hash: Q-"+Math.random().toString(36).slice(2,8));alert('Sent!')}
-function mine(){blocks.push({id:blocks.length});localStorage.setItem('q_blocks',JSON.stringify(blocks));w.bal+=5;save();document.getElementById('bal').innerText=w.bal+' QTC';document.getElementById('usd').innerText="≈ $"+(w.bal*0.5).toFixed(2);document.getElementById('bNo').innerText=blocks.length;document.getElementById('bCount').innerText=blocks.length;log("⛏️ Mined Block #"+blocks.length+" +5 QTC | Q-Hash: Q-"+Math.random().toString(36).slice(2,8))}
-function importWallet(){let p=prompt("Private Key:");if(!p)return;if(!w)createWallet();w.priv=p;save();log("Imported key")}
-if(localStorage.getItem('q_wallet'))unlock();
-// Fix QR toggle simple
-function toggleQR(){let el=document.getElementById('qrcode');el.style.display = (el.style.display==='none'||el.style.display==='')?'block':'none'; if(el.style.display==='block' && !el.innerHTML){makeQR()}}
+const $ = id => document.getElementById(id);
+const statusEl = $('status');
+
+function showView(walletData, showSeed=false){
+  $('loginView').classList.add('hidden');
+  $('walletView').classList.remove('hidden');
+  $('addr').innerText = walletData.address;
+  if(showSeed){
+    $('mnemoBox').innerText = walletData.mnemonic;
+    $('mnemoBox').classList.remove('hidden');
+  }
+}
+
+$('createBtn').onclick = async ()=>{
+  const p = $('pass').value, cp = $('cpass').value;
+  if(p.length < 8) return statusEl.innerText = "Password min 8 chars";
+  const stored = localStorage.getItem('qtrust_enc');
+  if(stored){
+    try{
+      const dec = CryptoJS.AES.decrypt(stored, p).toString(CryptoJS.enc.Utf8);
+      if(!dec) throw Error();
+      const data = JSON.parse(dec);
+      showView(data);
+      localStorage.setItem('qtrust_unlocked','1');
+      statusEl.innerText="";
+    }catch{ statusEl.innerText="Wrong Password!"; }
+  } else {
+    if(p!==cp) return statusEl.innerText="Passwords not match";
+    const w = ethers.Wallet.createRandom();
+    const data = {address:w.address, mnemonic:w.mnemonic.phrase, privateKey:w.privateKey};
+    const enc = CryptoJS.AES.encrypt(JSON.stringify(data), p).toString();
+    localStorage.setItem('qtrust_enc', enc);
+    localStorage.setItem('qtrust_unlocked','1');
+    showView(data,true);
+  }
+};
+
+$('importBtn').onclick = ()=> $('importBox').classList.toggle('hidden');
+
+$('doImportBtn').onclick = async ()=>{
+  const phrase = $('mnemonicInput').value.trim();
+  const p = $('pass').value;
+  if(p.length<8) return statusEl.innerText="Set password first";
+  if(phrase.split(' ').length < 12) return statusEl.innerText="Enter 12 words";
+  try{
+    const w = ethers.Wallet.fromPhrase(phrase);
+    const data = {address:w.address, mnemonic:phrase, privateKey:w.privateKey};
+    const enc = CryptoJS.AES.encrypt(JSON.stringify(data), p).toString();
+    localStorage.setItem('qtrust_enc', enc);
+    localStorage.setItem('qtrust_unlocked','1');
+    showView(data,false);
+  }catch(e){ statusEl.innerText="Invalid seed phrase"; }
+};
+
+$('showSeedBtn').onclick = ()=>{
+  $('mnemoBox').classList.toggle('hidden');
+};
+
+$('connectChainBtn').onclick = async ()=>{
+  const CHAIN_ID_HEX = '0x51DD';
+  try{
+    if(window.ethereum){
+      await window.ethereum.request({method:'wallet_addEthereumChain', params:[{chainId:CHAIN_ID_HEX, chainName:'QTRUST Quantum Chain', rpcUrls:['https://rpc.qtrustchain.com'], nativeCurrency:{name:'QTRUST', symbol:'QTRUST', decimals:18}, blockExplorerUrls:['https://explorer.qtrustchain.com']}]});
+      alert('Chain 20949 Connected!');
+    } else {
+      alert('QTRUST Chain ID: 20949 (0x51DD) - Add to Metamask manually');
+    }
+  }catch(e){ alert(e.message); }
+};
+
+$('lockBtn').onclick = ()=>{
+  $('walletView').classList.add('hidden');
+  $('loginView').classList.remove('hidden');
+  $('pass').value=''; $('cpass').value='';
+  localStorage.removeItem('qtrust_unlocked');
+};
+
+$('logoutBtn').onclick = ()=>{
+  if(confirm('Delete wallet from this device?')){
+    localStorage.clear();
+    location.reload();
+  }
+};
 </script>
 </body>
 </html>
