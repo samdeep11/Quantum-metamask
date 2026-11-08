@@ -3,119 +3,88 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>PQC Wallets - Quantum Coin</title>
+<title>PQC Wallets</title>
 <style>
 *{margin:0;padding:0;box-sizing:border-box;font-family:Arial,sans-serif}
-body{background:#0a0a0a;color:#fff;min-height:100vh}
-.header{text-align:center;padding:20px}
-.header h1{color:#f5d67b;font-size:28px}
-.header p{color:#aaa;font-size:13px}
-.card{background:#1a1a1a;border:1px solid #f5d67b33;border-radius:20px;margin:15px;padding:20px;text-align:center}
-.card small{color:#f5d67b}
-.balance{font-size:38px;color:#f5d67b;font-weight:bold;margin:10px 0}
-.btns{display:flex;gap:10px;margin:15px}
-.btn{flex:1;padding:14px;border-radius:30px;border:none;font-size:16px;font-weight:bold;cursor:pointer}
+body{background:#050505;color:#fff;padding-bottom:90px}
+.top{text-align:center;padding:20px 10px 5px}
+.top h1{color:#f5d67b;font-size:30px}
+.card{background:linear-gradient(160deg,#1c1a10,#0f0f0f);border:1px solid #f5d67b55;border-radius:22px;margin:15px;padding:22px;text-align:center;box-shadow:0 10px 30px #000}
+.card small{color:#f5d67b;font-size:13px}
+.balance{font-size:42px;color:#f5d67b;font-weight:900;margin:8px 0}
+.usd{color:#999}
+.btns{display:flex;gap:12px;margin-top:18px}
+.btn{flex:1;padding:14px;border-radius:30px;border:none;font-size:17px;font-weight:bold;cursor:pointer}
 .send{background:#f5d67b;color:#000}
-.receive{background:#222;color:#f5d67b;border:1px solid #f5d67b}
-.box{background:#1a1a1a;border-radius:15px;margin:15px;padding:15px}
-input{width:100%;padding:12px;border-radius:10px;border:1px solid #333;background:#222;color:#fff;margin:8px 0}
-.words{background:#222;padding:12px;border-radius:10px;color:#f5d67b;line-height:1.8;font-size:14px;word-spacing:4px}
-.small{font-size:12px;color:#999;text-align:center;padding:10px}
+.receive{background:#111;color:#f5d67b;border:1px solid #f5d67b}
+.box{background:#141414;border-radius:20px;margin:15px;padding:16px}
+.box h3{color:#f5d67b;margin-bottom:6px}
+input{width:100%;padding:13px;border-radius:12px;border:1px solid #333;background:#222;color:#fff;margin:8px 0}
+.words{background:#222;padding:12px;border-radius:12px;color:#f5d67b;line-height:1.9;font-size:14px}
+.tx{display:flex;justify-content:space-between;align-items:center;padding:12px 0;border-bottom:1px solid #222}
+.tx b{font-size:14px}
+.green{color:#4ade80}.red{color:#f87171}
+.nav{position:fixed;bottom:0;left:0;right:0;background:#111;border-top:1px solid #f5d67b33;display:flex;padding:12px 0;text-align:center}
+.nav div{flex:1;font-size:12px;color:#888;cursor:pointer}
+.nav .active{color:#f5d67b}
+.icon{width:38px;height:38px;background:#f5d67b;border-radius:50%;display:flex;align-items:center;justify-content:center;color:#000;font-size:20px;font-weight:bold;margin-right:10px}
 </style>
 </head>
 <body>
-<div class="header">
-<h1>🛡️ PQC Wallets</h1>
-<p>Quantum Coin - Quantum Protected Wallet</p>
-</div>
+<div class="top"><h1>🛡️ PQC Wallets</h1><p style="color:#888;font-size:12px">Quantum Coin - Quantum Protected Wallet</p></div>
 
 <div class="card">
 <small>Quantum Coin PQC</small>
 <div class="balance" id="bal">0 PQC</div>
-<div style="color:#999;font-size:13px" id="addr">Wallet nahi bana hai</div>
-</div>
-
+<div style="color:#f5d67b;font-size:14px">PQC</div>
+<div class="usd" id="usd">≈ $0.00 USD</div>
+<div style="font-size:12px;color:#888;margin-top:8px" id="addr">Wallet nahi bana hai</div>
 <div class="btns">
 <button class="btn send" onclick="sendPQC()">↑ Send</button>
 <button class="btn receive" onclick="showReceive()">↓ Receive</button>
 </div>
+</div>
 
-<div class="box" id="mainBox">
-<h3 style="color:#f5d67b">Wallet Banao</h3>
-<p style="font-size:13px;color:#aaa;margin:8px 0">Naya Wallet banao ya purana Import karo</p>
-<button class="btn send" style="width:100%" onclick="createWallet()">+ Create New Wallet</button>
+<div class="box" id="walletBox">
+<h3>Wallet Banao</h3><p style="color:#aaa;font-size:13px">Naya Wallet banao ya purana Import karo</p>
+<button class="btn send" style="width:100%;margin-top:10px" onclick="createWallet()">+ Create New Wallet</button>
 <input id="importWords" placeholder="25 Words yahan paste karo - Import ke liye">
 <button class="btn receive" style="width:100%" onclick="importWallet()">Import Wallet</button>
 <div id="wordsBox" style="display:none;margin-top:12px">
-<p style="font-size:12px;color:#ff6b6b">⚠️ Ye 25 Words Notebook me likh lo - Kisi ko mat bhejo</p>
+<p style="font-size:12px;color:#ff6b6b">⚠️ Ye 25 Words Notebook me likh lo</p>
 <div class="words" id="words"></div>
 <button class="btn send" style="width:100%;margin-top:10px" onclick="saveWords()">Maine Likh Liye - Wallet Kholo</button>
 </div>
 </div>
 
 <div class="box">
-<h3 style="color:#f5d67b">Transaction History</h3>
-<div id="history" style="font-size:14px;color:#ccc;margin-top:10px">Abhi koi transaction nahi hai</div>
+<div style="display:flex;justify-content:space-between"><h3>Transaction History</h3><span style="color:#f5d67b;font-size:13px">See all ›</span></div>
+<div id="history" style="margin-top:5px;color:#ccc;font-size:14px">Abhi koi transaction nahi hai</div>
 </div>
 
-<p class="small">PQC Wallets v1.0 - Quantum-Safe | Algorand + QAN Compatible<br>25 Words = Teri Chabi - Kho gaye to Paisa gaya</p>
+<div class="nav">
+<div class="active">🏠<br>Home</div>
+<div onclick="alert('Assets me PQC + ALGO dikhega')">💼<br>Assets</div>
+<div onclick="alert('Swap jald aa raha hai')">⇄<br>Swap</div>
+<div onclick="showReceive()">👤<br>Profile</div>
+</div>
 
 <script>
-let wordsList = ["quantum","coin","protect","future","safe","gold","power","trust","secure","wallet","crypto","india","budaun","pqc","blockchain","falcon","dilithium","shield","money","freedom","light","star","king","dream","luck"];
-let myWallet = JSON.parse(localStorage.getItem('pqc_wallet')||'null');
-let balance = parseInt(localStorage.getItem('pqc_bal')||'0');
-let history = JSON.parse(localStorage.getItem('pqc_hist')||'[]');
+let wordsList=["quantum","coin","protect","future","safe","gold","power","trust","secure","wallet","crypto","india","budaun","pqc","blockchain","falcon","dilithium","shield","money","freedom","light","star","king","dream","luck"];
+let myWallet=JSON.parse(localStorage.getItem('pqc_wallet')||'null');
+let balance=parseInt(localStorage.getItem('pqc_bal')||'0');
+let history=JSON.parse(localStorage.getItem('pqc_hist')||'[]');
 function render(){
-  document.getElementById('bal').innerText = balance.toLocaleString('en-IN') + ' PQC';
-  if(myWallet) document.getElementById('addr').innerText = myWallet.addr;
-  if(history.length){
-    document.getElementById('history').innerHTML = history.map(h=>`<div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid #222"><span>${h.text}</span><b style="color:${h.amt>0?'#4ade80':'#f87171'}">${h.amt>0?'+':''}${h.amt.toLocaleString('en-IN')} PQC</b></div>`).join('');
-  }
+ document.getElementById('bal').innerText=balance.toLocaleString('en-IN')+' PQC';
+ document.getElementById('usd').innerText='≈ $'+(balance*0.0025).toLocaleString('en-IN')+' USD';
+ if(myWallet) document.getElementById('addr').innerText=myWallet.addr;
+ if(history.length){document.getElementById('history').innerHTML=history.map(h=>`<div class="tx"><div style="display:flex;align-items:center"><div class="icon">${h.amt>0?'↓':'↑'}</div><div><b>${h.text}</b><br><span style="color:#888;font-size:12px">Today</span></div></div><b class="${h.amt>0?'green':'red'}">${h.amt>0?'+':''}${h.amt.toLocaleString('en-IN')} PQC</b></div>`).join('');}
 }
-function genWords(){
-  let arr=[]; for(let i=0;i<25;i++) arr.push(wordsList[Math.floor(Math.random()*wordsList.length)]);
-  return arr;
-}
-function createWallet(){
-  let w = genWords();
-  let addr = 'PQC' + Math.random().toString(36).substring(2,10).toUpperCase() + '...' + Math.random().toString(36).substring(2,6).toUpperCase();
-  localStorage.setItem('temp_words', JSON.stringify(w));
-  localStorage.setItem('temp_addr', addr);
-  document.getElementById('words').innerText = w.join('  ');
-  document.getElementById('wordsBox').style.display='block';
-}
-function saveWords(){
-  let w = JSON.parse(localStorage.getItem('temp_words'));
-  let addr = localStorage.getItem('temp_addr');
-  myWallet = {words:w, addr:addr};
-  localStorage.setItem('pqc_wallet', JSON.stringify(myWallet));
-  if(balance===0){ balance=50000000; localStorage.setItem('pqc_bal', balance); history.push({text:'PQC Mint - 5 Crore', amt:50000000}); localStorage.setItem('pqc_hist', JSON.stringify(history)); }
-  alert('Wallet ban gaya! Address: '+addr);
-  render();
-}
-function importWallet(){
-  let v = document.getElementById('importWords').value.trim();
-  if(v.split(' ').length < 10) return alert('Sahi 25 Words daalo');
-  let addr = 'PQC' + Math.random().toString(36).substring(2,10).toUpperCase() + '...IMPORTED';
-  myWallet = {words:v.split(' '), addr:addr};
-  localStorage.setItem('pqc_wallet', JSON.stringify(myWallet));
-  alert('Wallet Import ho gaya! '+addr);
-  render();
-}
-function sendPQC(){
-  if(!myWallet) return alert('Pehle Wallet banao');
-  let to = prompt('Kis Address pe bhejna hai?');
-  let amt = parseInt(prompt('Kitna PQC bhejna hai?')||'0');
-  if(!to || !amt || amt>balance) return alert('Galat Amount ya Balance kam hai');
-  balance -= amt; localStorage.setItem('pqc_bal', balance);
-  history.unshift({text:'Sent to '+to.substring(0,10)+'...', amt:-amt}); localStorage.setItem('pqc_hist', JSON.stringify(history));
-  alert(amt+' PQC bhej diya!');
-  render();
-}
-function showReceive(){
-  if(!myWallet) return alert('Pehle Wallet banao');
-  prompt('Tera Address - Copy karke kisi ko bhejo:', myWallet.addr);
-}
+function createWallet(){let w=[];for(let i=0;i<25;i++)w.push(wordsList[Math.floor(Math.random()*wordsList.length)]);let addr='PQC'+Math.random().toString(36).substring(2,10).toUpperCase()+'...'+Math.random().toString(36).substring(2,6).toUpperCase();localStorage.setItem('temp_words',JSON.stringify(w));localStorage.setItem('temp_addr',addr);document.getElementById('words').innerText=w.join('  ');document.getElementById('wordsBox').style.display='block';}
+function saveWords(){let w=JSON.parse(localStorage.getItem('temp_words'));let addr=localStorage.getItem('temp_addr');myWallet={words:w,addr:addr};localStorage.setItem('pqc_wallet',JSON.stringify(myWallet));if(balance===0){balance=50000000;localStorage.setItem('pqc_bal',balance);history.push({text:'PQC Mint - 5 Crore',amt:50000000});localStorage.setItem('pqc_hist',JSON.stringify(history));}alert('Wallet ban gaya!');render();}
+function importWallet(){let v=document.getElementById('importWords').value.trim();if(v.split(' ').length<10)return alert('Sahi 25 Words daalo');let addr='PQC'+Math.random().toString(36).substring(2,10).toUpperCase()+'...IMPORTED';myWallet={words:v.split(' '),addr:addr};localStorage.setItem('pqc_wallet',JSON.stringify(myWallet));alert('Import ho gaya!');render();}
+function sendPQC(){if(!myWallet)return alert('Pehle Wallet banao');let to=prompt('Kis Address pe bhejna hai?');let amt=parseInt(prompt('Kitna PQC bhejna hai?')||'0');if(!to||!amt||amt>balance)return alert('Galat Amount');balance-=amt;localStorage.setItem('pqc_bal',balance);history.unshift({text:'Sent to '+to.substring(0,10)+'...',amt:-amt});localStorage.setItem('pqc_hist',JSON.stringify(history));alert(amt+' PQC bhej diya!');render();}
+function showReceive(){if(!myWallet)return alert('Pehle Wallet banao');prompt('Tera Address - Copy karo:',myWallet.addr);}
 render();
 </script>
 </body>
