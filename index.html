@@ -3,87 +3,83 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>PQC Wallets - Powered by Algorand</title>
+<title>PQC Wallets - Fixed</title>
 <script src="https://cdn.jsdelivr.net/npm/algosdk@2.7.0/dist/browser/algosdk.min.js"></script>
 <style>
 *{margin:0;padding:0;box-sizing:border-box;font-family:Arial,sans-serif}
-body{background:#050505;color:#fff;padding-bottom:95px}
-.top{text-align:center;padding:18px 10px 5px}.top h1{color:#f5d67b;font-size:30px}.top p{color:#888;font-size:11px}
+body{background:#050505;color:#fff;padding-bottom:90px}
+.topbar{display:flex;align-items:center;justify-content:space-between;padding:14px 15px;background:#0a0a0a;position:sticky;top:0;z-index:20;border-bottom:1px solid #f5d67b33}
+.backBtn{background:#1a1a1a;color:#f5d67b;border:1px solid #f5d67b55;width:38px;height:38px;border-radius:50%;font-size:18px;cursor:pointer}
+.topTitle{color:#f5d67b;font-weight:900;font-size:18px}
 .card{background:linear-gradient(160deg,#1c1a10,#0f0f0f);border:1px solid #f5d67b55;border-radius:22px;margin:15px;padding:22px;text-align:center}
-.balance{font-size:42px;color:#f5d67b;font-weight:900;margin:6px 0}
-.btns{display:flex;gap:10px;margin-top:16px}.btn{flex:1;padding:14px;border-radius:30px;border:none;font-weight:bold;cursor:pointer;font-size:15px}
+.balance{font-size:42px;color:#f5d67b;font-weight:900}
+.btns{display:flex;gap:10px;margin-top:16px}.btn{flex:1;padding:14px;border-radius:30px;border:none;font-weight:bold;cursor:pointer}
 .send{background:#f5d67b;color:#000}.receive{background:#111;color:#f5d67b;border:1px solid #f5d67b}
 .box{background:#141414;border-radius:20px;margin:15px;padding:16px}
-input,select{width:100%;padding:13px;border-radius:12px;border:1px solid #333;background:#222;color:#fff;margin:8px 0;font-size:14px}
-.nav{position:fixed;bottom:0;left:0;right:0;background:#111;display:flex;padding:12px 0;text-align:center;border-top:1px solid #f5d67b33;z-index:10}
-.nav div{flex:1;font-size:12px;color:#888;cursor:pointer}.nav .active{color:#f5d67b}
+input,select{width:100%;padding:13px;border-radius:12px;border:1px solid #333;background:#222;color:#fff;margin:8px 0}
+.nav{position:fixed;bottom:0;left:0;right:0;background:#111;display:flex;padding:8px 0 10px;text-align:center;border-top:2px solid #f5d67b;z-index:50}
+.nav div{flex:1;font-size:11px;color:#888;cursor:pointer;padding:4px 0}.nav .active{color:#f5d67b}
+.nav span{font-size:20px;display:block}
 .page{display:none}.page.active{display:block}
 .asset{display:flex;justify-content:space-between;padding:12px 0;border-bottom:1px solid #222}
+#loginPage{position:fixed;top:0;left:0;right:0;bottom:0;background:#050505;z-index:100;overflow-y:auto;padding:20px 15px 40px;text-align:center}
+.bigBtn{width:100%;padding:16px;border-radius:30px;border:none;font-weight:bold;font-size:16px;cursor:pointer;margin-top:12px}
 </style>
 </head>
 <body>
 
-<div class="top"><h1>🛡️ PQC Wallets</h1><p>Quantum Coin • Powered by Algorand • All Working</p></div>
+<!-- LOGIN -->
+<div id="loginPage">
+<div style="font-size:70px;margin-top:25px">🛡️</div>
+<div style="font-size:34px;color:#f5d67b;font-weight:900">PQC Wallets</div>
+<p style="color:#aaa;font-size:13px">Quantum Coin • Powered by Algorand</p>
+<div style="background:#141414;border:1px solid #f5d67b33;border-radius:22px;padding:20px;margin-top:20px;text-align:left">
+<div id="hasWalletBox" style="display:none">
+<p style="color:#4ade80">✅ Purana Wallet mila hai</p><p id="savedAddr" style="font-size:11px;color:#888;word-break:break-all"></p>
+<button class="bigBtn send" onclick="loginContinue()">Continue → Wallet Kholo</button>
+</div>
+<button class="bigBtn send" onclick="loginCreate()">+ Create New Wallet</button>
+<div id="loginCreateBox" style="display:none;margin-top:12px"><div id="loginWords" style="background:#222;padding:12px;border-radius:12px;color:#f5d67b;line-height:1.8;font-size:13px"></div><p style="color:#ff6b6b;font-size:12px;margin-top:8px">⚠️ Ye 25 Words likh lo</p><button class="bigBtn send" onclick="loginSave()">Maine Likh Liye - Wallet Kholo</button></div>
+<p style="text-align:center;color:#888;margin:14px 0">— OR —</p>
+<input id="loginImport" placeholder="25 Words paste karo">
+<button class="bigBtn receive" onclick="loginImport()">Import Wallet</button>
+<button class="bigBtn receive" onclick="loginGuest()">Guest me Dekho</button>
+</div>
+</div>
+
+<!-- TOP BAR WITH BACK BUTTON -->
+<div class="topbar">
+<button class="backBtn" onclick="goBack()">←</button>
+<div class="topTitle">🛡️ PQC Wallets</div>
+<button class="backBtn" onclick="goLogin()">🏠</button>
+</div>
 
 <!-- HOME -->
 <div id="page-home" class="page active">
-<div class="card">
-<div style="color:#f5d67b;font-size:13px">Quantum Coin PQC</div>
-<div class="balance" id="bal">0 PQC</div>
-<div style="color:#f5d67b;font-size:13px">PQC</div>
-<div id="addr" style="font-size:11px;color:#888;margin-top:8px;word-break:break-all">Wallet nahi bana hai</div>
-<div class="btns"><button class="btn send" onclick="sendPQC()">↑ Send</button><button class="btn receive" onclick="showReceive()">↓ Receive</button></div>
-</div>
-
-<div class="box">
-<h3 style="color:#f5d67b">Algorand Wallet</h3>
-<p style="color:#aaa;font-size:12px">Algorand Source Code se bana hai</p>
-<button class="btn send" style="width:100%;margin-top:10px" onclick="createWallet()">+ Create New Wallet</button>
-<div id="wordsBox" style="display:none;margin-top:12px">
-<p style="font-size:12px;color:#ff6b6b">⚠️ Ye 25 Words Notebook me likh lo</p>
-<div id="words" style="background:#222;padding:12px;border-radius:12px;color:#f5d67b;line-height:1.8;font-size:13px;margin-top:6px"></div>
-<button class="btn send" style="width:100%;margin-top:10px" onclick="saveWallet()">Maine Likh Liye - Wallet Kholo</button>
-</div>
-<input id="importMnemonic" placeholder="25 Words yahan paste karo - Import">
-<button class="btn receive" style="width:100%" onclick="importWallet()">Import Wallet</button>
-</div>
-
-<div class="box"><div style="display:flex;justify-content:space-between"><h3 style="color:#f5d67b">Transaction History</h3><span style="color:#f5d67b;font-size:13px">See all ›</span></div><div id="hist" style="margin-top:8px;color:#ccc;font-size:13px">Abhi koi transaction nahi</div></div>
+<div class="card"><div style="color:#f5d67b">Quantum Coin PQC</div><div class="balance" id="bal">0 PQC</div><div id="addr" style="font-size:11px;color:#888;word-break:break-all">Wallet nahi bana</div><div class="btns"><button class="btn send" onclick="sendPQC()">↑ Send</button><button class="btn receive" onclick="showReceive()">↓ Receive</button></div></div>
+<div class="box"><h3 style="color:#f5d67b">Quick Actions</h3><div class="btns"><button class="btn receive" onclick="showPage('assets')">💼 Assets</button><button class="btn receive" onclick="showPage('swap')">⇄ Swap</button><button class="btn receive" onclick="showPage('history')">📜 History</button></div></div>
+<div class="box"><h3 style="color:#f5d67b">Transaction History</h3><div id="hist">Abhi koi transaction nahi</div></div>
 </div>
 
 <!-- ASSETS -->
-<div id="page-assets" class="page">
-<div class="box"><h3 style="color:#f5d67b">My Assets</h3><div id="assetsList"></div><button class="btn send" style="width:100%;margin-top:12px" onclick="addAlgo()">+ Add ALGO Asset</button></div>
-<div class="box"><h3 style="color:#f5d67b">Add Custom Token</h3><input id="customAssetId" placeholder="Asset ID - Jaise 727123456"><button class="btn receive" style="width:100%" onclick="addCustom()">Add Token</button></div>
-</div>
+<div id="page-assets" class="page"><div class="box"><h3 style="color:#f5d67b">My Assets</h3><div id="assetsList"></div><button class="btn send" style="width:100%;margin-top:12px" onclick="addAlgo()">+ Add ALGO Asset</button></div><div class="box"><h3 style="color:#f5d67b">Add Custom Token</h3><input id="customAssetId" placeholder="Asset ID"><button class="btn receive" style="width:100%" onclick="addCustom()">Add Token</button></div></div>
 
 <!-- SWAP -->
-<div id="page-swap" class="page">
-<div class="box"><h3 style="color:#f5d67b">Swap</h3>
-<label style="font-size:12px;color:#aaa">From</label><select id="fromAsset"><option value="PQC">PQC</option><option value="ALGO">ALGO</option></select>
-<input id="swapAmt" type="number" placeholder="Kitna Swap karna hai?">
-<label style="font-size:12px;color:#aaa">To</label><select id="toAsset"><option value="ALGO">ALGO</option><option value="PQC">PQC</option></select>
-<div id="swapResult" style="color:#f5d67b;margin:10px 0">You will get: 0</div>
-<button class="btn send" style="width:100%" onclick="doSwap()">Swap Now</button>
-</div>
-</div>
+<div id="page-swap" class="page"><div class="box"><h3 style="color:#f5d67b">Swap</h3><label style="font-size:12px;color:#aaa">From</label><select id="fromAsset"><option value="PQC">PQC</option><option value="ALGO">ALGO</option></select><input id="swapAmt" type="number" placeholder="Kitna Swap karna hai?"><label style="font-size:12px;color:#aaa">To</label><select id="toAsset"><option value="ALGO">ALGO</option><option value="PQC">PQC</option></select><div id="swapResult" style="color:#f5d67b;margin:10px 0">You will get: 0</div><button class="btn send" style="width:100%" onclick="doSwap()">Swap Now</button></div></div>
+
+<!-- HISTORY -->
+<div id="page-history" class="page"><div class="box"><h3 style="color:#f5d67b">Full History</h3><div id="hist2">Abhi koi transaction nahi</div><button class="btn receive" style="width:100%;margin-top:12px" onclick="showPage('home')">← Back to Home</button></div></div>
 
 <!-- PROFILE -->
-<div id="page-profile" class="page">
-<div class="box"><h3 style="color:#f5d67b">Profile</h3>
-<p style="font-size:13px;color:#aaa">Address:</p><p id="pAddr" style="word-break:break-all;font-size:13px">Wallet nahi bana</p>
-<p style="font-size:13px;color:#aaa;margin-top:12px">Balance:</p><p id="pBal" style="color:#f5d67b">0 PQC</p>
-<button class="btn receive" style="width:100%;margin-top:12px" onclick="showWords()">Show 25 Words</button>
-<button class="btn receive" style="width:100%;margin-top:10px" onclick="copyAddr()">Copy Address</button>
-<button class="btn receive" style="width:100%;margin-top:10px;background:#3a1111;color:#ff6b6b;border-color:#ff6b6b" onclick="logout()">Log Out / Wallet Delete</button>
-</div>
-</div>
+<div id="page-profile" class="page"><div class="box"><h3 style="color:#f5d67b">Profile</h3><p style="font-size:13px;color:#aaa">Address:</p><p id="pAddr" style="word-break:break-all">Wallet nahi bana</p><p style="font-size:13px;color:#aaa;margin-top:12px">Balance:</p><p id="pBal" style="color:#f5d67b">0 PQC</p><button class="btn receive" style="width:100%;margin-top:12px" onclick="showWords()">Show 25 Words</button><button class="btn receive" style="width:100%;margin-top:10px" onclick="copyAddr()">Copy Address</button><button class="btn receive" style="width:100%;margin-top:10px" onclick="goLogin()">Back to Login</button><button class="btn receive" style="width:100%;margin-top:10px;background:#3a1111;color:#ff6b6b" onclick="logout()">Log Out</button></div></div>
 
+<!-- BOTTOM NAV - 5 BUTTON - HAMESHA DIKHEGA -->
 <div class="nav">
-<div id="nav-home" class="active" onclick="showPage('home')">🏠<br>Home</div>
-<div id="nav-assets" onclick="showPage('assets')">💼<br>Assets</div>
-<div id="nav-swap" onclick="showPage('swap')">⇄<br>Swap</div>
-<div id="nav-profile" onclick="showPage('profile')">👤<br>Profile</div>
+<div id="nav-home" class="active" onclick="showPage('home')"><span>🏠</span>Home</div>
+<div id="nav-assets" onclick="showPage('assets')"><span>💼</span>Assets</div>
+<div id="nav-swap" onclick="showPage('swap')"><span>⇄</span>Swap</div>
+<div id="nav-history" onclick="showPage('history')"><span>📜</span>History</div>
+<div id="nav-profile" onclick="showPage('profile')"><span>👤</span>Profile</div>
 </div>
 
 <script>
@@ -93,72 +89,50 @@ let algoBal = parseFloat(localStorage.getItem('pqc_algo')||'0');
 let hist = JSON.parse(localStorage.getItem('pqc_hist')||'[]');
 let hasAlgo = localStorage.getItem('hasAlgo')==='1';
 let customAssets = JSON.parse(localStorage.getItem('pqc_custom')||'[]');
+let pageHistory = ['home'];
+
+function checkLogin(){ if(myAcc){ document.getElementById('hasWalletBox').style.display='block'; document.getElementById('savedAddr').innerText=myAcc.addr; } }
+function loginContinue(){ document.getElementById('loginPage').style.display='none'; render(); }
+function loginCreate(){ const acc=algosdk.generateAccount(); const mn=algosdk.secretKeyToMnemonic(acc.sk); localStorage.setItem('temp_mn',mn); localStorage.setItem('temp_addr',acc.addr); document.getElementById('loginWords').innerText=mn; document.getElementById('loginCreateBox').style.display='block'; }
+function loginSave(){ myAcc={mnemonic:localStorage.getItem('temp_mn'),addr:localStorage.getItem('temp_addr')}; localStorage.setItem('pqc_algo_wallet',JSON.stringify(myAcc)); if(bal===0){bal=50000000;localStorage.setItem('pqc_bal',bal);hist.unshift({text:'PQC Mint - 5 Crore',amt:'+50,000,000 PQC'});localStorage.setItem('pqc_hist',JSON.stringify(hist));} alert('Wallet ban gaya!'); document.getElementById('loginPage').style.display='none'; render(); }
+function loginImport(){ let mn=document.getElementById('loginImport').value.trim(); try{let acc=algosdk.mnemonicToSecretKey(mn);myAcc={mnemonic:mn,addr:acc.addr};localStorage.setItem('pqc_algo_wallet',JSON.stringify(myAcc));alert('Import ho gaya!');document.getElementById('loginPage').style.display='none';render();}catch(e){alert('Galat 25 Words');} }
+function loginGuest(){ document.getElementById('loginPage').style.display='none'; render(); }
+function goLogin(){ document.getElementById('loginPage').style.display='block'; checkLogin(); }
 
 function render(){
- document.getElementById('bal').innerText = bal.toLocaleString('en-IN')+' PQC';
- if(myAcc) document.getElementById('addr').innerText = myAcc.addr;
- if(myAcc) document.getElementById('pAddr').innerText = myAcc.addr;
- document.getElementById('pBal').innerText = bal.toLocaleString('en-IN')+' PQC | '+algoBal.toFixed(4)+' ALGO';
- document.getElementById('hist').innerHTML = hist.length ? hist.map(h=>`<div style="display:flex;justify-content:space-between;padding:10px 0;border-bottom:1px solid #222"><b>${h.text}</b><b style="color:${h.amt.includes('-')?'#f87171':'#4ade80'}">${h.amt}</b></div>`).join('') : 'Abhi koi transaction nahi';
- let assets = `<div class="asset"><b>🪙 PQC - Quantum Coin</b><b>${bal.toLocaleString('en-IN')} PQC</b></div>`;
- if(hasAlgo) assets += `<div class="asset"><b>◆ ALGO - Algorand</b><b>${algoBal.toFixed(4)} ALGO</b></div>`;
- customAssets.forEach(a=>{ assets += `<div class="asset"><b>🪙 Asset ${a}</b><b>0</b></div>`; });
- document.getElementById('assetsList').innerHTML = assets;
+ document.getElementById('bal').innerText=bal.toLocaleString('en-IN')+' PQC';
+ if(myAcc) document.getElementById('addr').innerText=myAcc.addr;
+ if(myAcc) document.getElementById('pAddr').innerText=myAcc.addr;
+ document.getElementById('pBal').innerText=bal.toLocaleString('en-IN')+' PQC | '+algoBal.toFixed(4)+' ALGO';
+ let h = hist.length?hist.map(x=>`<div style="display:flex;justify-content:space-between;padding:10px 0;border-bottom:1px solid #222"><b>${x.text}</b><b style="color:${x.amt.includes('-')?'#f87171':'#4ade80'}">${x.amt}</b></div>`).join(''):'Abhi koi transaction nahi';
+ document.getElementById('hist').innerHTML=h; document.getElementById('hist2').innerHTML=h;
+ let assets=`<div class="asset"><b>🪙 PQC - Quantum Coin</b><b>${bal.toLocaleString('en-IN')} PQC</b></div>`;
+ if(hasAlgo) assets+=`<div class="asset"><b>◆ ALGO - Algorand</b><b>${algoBal.toFixed(4)} ALGO</b></div>`;
+ customAssets.forEach(a=>{assets+=`<div class="asset"><b>🪙 Asset ${a}</b><b>0</b></div>`;});
+ document.getElementById('assetsList').innerHTML=assets;
 }
 function showPage(p){
  document.querySelectorAll('.page').forEach(e=>e.classList.remove('active'));
  document.getElementById('page-'+p).classList.add('active');
  document.querySelectorAll('.nav div').forEach(e=>e.classList.remove('active'));
  document.getElementById('nav-'+p).classList.add('active');
+ pageHistory.push(p);
+ window.scrollTo(0,0);
 }
-function createWallet(){
- const acc = algosdk.generateAccount();
- const mn = algosdk.secretKeyToMnemonic(acc.sk);
- localStorage.setItem('temp_mn', mn); localStorage.setItem('temp_addr', acc.addr);
- document.getElementById('words').innerText = mn;
- document.getElementById('wordsBox').style.display='block';
+function goBack(){
+ if(pageHistory.length>1){ pageHistory.pop(); let prev=pageHistory[pageHistory.length-1]; document.querySelectorAll('.page').forEach(e=>e.classList.remove('active')); document.getElementById('page-'+prev).classList.add('active'); document.querySelectorAll('.nav div').forEach(e=>e.classList.remove('active')); document.getElementById('nav-'+prev).classList.add('active'); }
+ else{ alert('Abhi Home pe hi ho - Piche koi Page nahi hai'); }
 }
-function saveWallet(){
- myAcc = {mnemonic:localStorage.getItem('temp_mn'), addr:localStorage.getItem('temp_addr')};
- localStorage.setItem('pqc_algo_wallet', JSON.stringify(myAcc));
- if(bal===0){ bal=50000000; localStorage.setItem('pqc_bal', bal); hist.unshift({text:'PQC Mint - 5 Crore', amt:'+50,000,000 PQC'}); localStorage.setItem('pqc_hist', JSON.stringify(hist)); }
- alert('Wallet ban gaya!'); render();
-}
-function importWallet(){
- let mn = document.getElementById('importMnemonic').value.trim();
- try{ let acc = algosdk.mnemonicToSecretKey(mn); myAcc={mnemonic:mn, addr:acc.addr}; localStorage.setItem('pqc_algo_wallet', JSON.stringify(myAcc)); alert('Import ho gaya!'); render(); }catch(e){ alert('Galat 25 Words'); }
-}
-function sendPQC(){
- if(!myAcc) return alert('Pehle Wallet banao');
- let to = prompt('Kis Address pe bhejna hai?'); let amt = parseInt(prompt('Kitna PQC bhejna hai?')||'0');
- if(!to||!amt||amt>bal) return alert('Galat Amount');
- bal-=amt; localStorage.setItem('pqc_bal', bal); hist.unshift({text:'Sent to '+to.substring(0,8)+'...', amt:'-'+amt.toLocaleString('en-IN')+' PQC'}); localStorage.setItem('pqc_hist', JSON.stringify(hist)); alert(amt+' PQC bhej diya!'); render();
-}
-function showReceive(){ if(!myAcc) return alert('Pehle Wallet banao'); prompt('Tera Address - Copy karo:', myAcc.addr); }
-function addAlgo(){ hasAlgo=true; localStorage.setItem('hasAlgo','1'); if(algoBal===0){ algoBal=100; localStorage.setItem('pqc_algo', algoBal); } alert('ALGO Add ho gaya - 100 ALGO TestNet'); render(); }
-function addCustom(){ let id=document.getElementById('customAssetId').value.trim(); if(!id) return alert('Asset ID daalo'); customAssets.push(id); localStorage.setItem('pqc_custom', JSON.stringify(customAssets)); alert('Token Add ho gaya: '+id); render(); }
-document.getElementById('swapAmt').addEventListener('input', ()=>{
- let amt = parseFloat(document.getElementById('swapAmt').value||'0');
- let from = document.getElementById('fromAsset').value;
- let rate = from==='PQC' ? 0.0025 : 400;
- document.getElementById('swapResult').innerText = 'You will get: '+(amt*rate).toFixed(4)+' '+(from==='PQC'?'ALGO':'PQC');
-});
-function doSwap(){
- if(!myAcc) return alert('Pehle Wallet banao');
- let amt = parseFloat(document.getElementById('swapAmt').value||'0');
- let from = document.getElementById('fromAsset').value;
- if(!amt) return alert('Amount daalo');
- if(from==='PQC'){ if(amt>bal) return alert('PQC kam hai'); bal-=amt; algoBal+=amt*0.0025; }
- else{ if(amt>algoBal) return alert('ALGO kam hai'); algoBal-=amt; bal+=amt*400; }
- localStorage.setItem('pqc_bal', bal); localStorage.setItem('pqc_algo', algoBal);
- hist.unshift({text:'Swap '+from+' -> '+(from==='PQC'?'ALGO':'PQC'), amt:'Swap '+amt});
- localStorage.setItem('pqc_hist', JSON.stringify(hist));
- alert('Swap ho gaya!'); render(); showPage('home');
-}
+function sendPQC(){ if(!myAcc) return alert('Pehle Wallet banao'); let to=prompt('Kis Address pe bhejna hai?'); let amt=parseInt(prompt('Kitna PQC?')||'0'); if(!to||!amt||amt>bal) return alert('Galat Amount'); bal-=amt; localStorage.setItem('pqc_bal',bal); hist.unshift({text:'Sent to '+to.substring(0,8)+'...',amt:'-'+amt.toLocaleString('en-IN')+' PQC'}); localStorage.setItem('pqc_hist',JSON.stringify(hist)); alert('Bhej diya!'); render(); }
+function showReceive(){ if(!myAcc) return alert('Pehle Wallet banao'); prompt('Tera Address:',myAcc.addr); }
+function addAlgo(){ hasAlgo=true; localStorage.setItem('hasAlgo','1'); if(algoBal===0){algoBal=100;localStorage.setItem('pqc_algo',algoBal);} alert('ALGO Add ho gaya'); render(); }
+function addCustom(){ let id=document.getElementById('customAssetId').value.trim(); if(!id) return alert('Asset ID daalo'); customAssets.push(id); localStorage.setItem('pqc_custom',JSON.stringify(customAssets)); alert('Token Add ho gaya'); render(); }
+document.getElementById('swapAmt').addEventListener('input',()=>{ let amt=parseFloat(document.getElementById('swapAmt').value||'0'); let from=document.getElementById('fromAsset').value; let rate=from==='PQC'?0.0025:400; document.getElementById('swapResult').innerText='You will get: '+(amt*rate).toFixed(4)+' '+(from==='PQC'?'ALGO':'PQC'); });
+function doSwap(){ if(!myAcc) return alert('Pehle Wallet banao'); let amt=parseFloat(document.getElementById('swapAmt').value||'0'); let from=document.getElementById('fromAsset').value; if(!amt) return alert('Amount daalo'); if(from==='PQC'){if(amt>bal) return alert('PQC kam hai'); bal-=amt; algoBal+=amt*0.0025;} else{if(amt>algoBal) return alert('ALGO kam hai'); algoBal-=amt; bal+=amt*400;} localStorage.setItem('pqc_bal',bal); localStorage.setItem('pqc_algo',algoBal); hist.unshift({text:'Swap '+from+' -> '+(from==='PQC'?'ALGO':'PQC'),amt:'Swap '+amt}); localStorage.setItem('pqc_hist',JSON.stringify(hist)); alert('Swap ho gaya!'); render(); showPage('home'); }
 function showWords(){ if(!myAcc) return alert('Pehle Wallet banao'); alert('Teri 25 Words:\n'+myAcc.mnemonic); }
-function copyAddr(){ if(!myAcc) return alert('Pehle Wallet banao'); navigator.clipboard.writeText(myAcc.addr); alert('Address Copy ho gaya!'); }
+function copyAddr(){ if(!myAcc) return alert('Pehle Wallet banao'); navigator.clipboard.writeText(myAcc.addr); alert('Copy ho gaya!'); }
 function logout(){ if(confirm('Wallet Delete karna hai?')){ localStorage.clear(); location.reload(); } }
-render();
+checkLogin(); render();
 </script>
 </body>
 </html>
