@@ -3,139 +3,178 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>QTRUST V3 - Quantum Wallet</title>
-<script src="https://cdn.jsdelivr.net/npm/ethers@6.13.2/dist/ethers.umd.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.2.0/crypto-js.min.js"></script>
+<title>QTrustChain - Testnet</title>
+<script src="https://cdn.jsdelivr.net/npm/algosdk@2.7.0/dist/browser/algosdk.min.js"></script>
 <style>
-body{font-family:Inter,system-ui;background:#0a0a0f;color:#fff;display:flex;justify-content:center;align-items:center;min-height:100vh;margin:0}
-.card{background:#15151f;border:1px solid #2a2a3a;border-radius:20px;padding:32px;width:360px;box-shadow:0 20px 60px rgba(0,0,0,0.5)}
-h2{margin:0 0 8px;text-align:center;background:linear-gradient(90deg,#8b5cf6,#3b82f6);-webkit-background-clip:text;-webkit-text-fill-color:transparent;font-size:26px}
-.sub{text-align:center;color:#888;font-size:13px;margin-bottom:24px}
-input{width:100%;padding:14px;background:#0f0f17;border:1px solid #2a2a3a;border-radius:12px;color:#fff;margin-bottom:12px;outline:none;box-sizing:border-box}
-input:focus{border-color:#8b5cf6}
-button{width:100%;padding:14px;border:none;border-radius:12px;font-weight:600;cursor:pointer;margin-bottom:10px}
-.primary{background:linear-gradient(90deg,#8b5cf6,#3b82f6);color:#fff}
-.secondary{background:#232334;color:#aaa}
-.mnemonic{background:#0f0f17;border:1px dashed #3a3a4a;padding:12px;border-radius:12px;font-size:13px;line-height:1.8;margin:12px 0;word-spacing:6px}
-.addr{font-size:12px;color:#8b5cf6;background:#1a1a2e;padding:10px;border-radius:10px;word-break:break-all;text-align:center}
-.hidden{display:none}
-#status{font-size:12px;text-align:center;color:#f87171;min-height:18px}
+*{margin:0;padding:0;box-sizing:border-box;font-family:system-ui}
+body{background:#050810;color:#fff;padding:16px}
+.top{text-align:center;padding:20px 0}
+.top h1{font-size:28px;letter-spacing:1px}
+.top h1 span{color:#00ff9d}
+.badge{background:#ff3b30;color:#fff;font-size:11px;padding:4px 10px;border-radius:20px;display:inline-block;margin-top:8px}
+.badge2{background:#1a2a1a;color:#00ff9d;font-size:11px;padding:4px 10px;border-radius:20px;display:inline-block;margin-top:6px}
+.card{background:#11182b;border:1px solid #222e4a;border-radius:16px;padding:16px;margin-top:14px}
+.card h3{font-size:15px;margin-bottom:10px}
+input{width:100%;padding:12px;border-radius:10px;border:1px solid #2a3555;background:#0a0f1e;color:#fff;margin-bottom:10px;outline:none}
+button{width:100%;padding:13px;border:none;border-radius:10px;background:#00ff9d;color:#000;font-weight:700;font-size:15px;cursor:pointer;margin-bottom:10px}
+button.sec{background:#1e2a4a;color:#fff}
+button.warn{background:#ffb800;color:#000}
+.addr{word-break:break-all;background:#0a0f1e;padding:10px;border-radius:10px;font-size:12px;color:#00ff9d;border:1px dashed #2a3555}
+.small{font-size:12px;color:#8a94b0;line-height:1.6}
+.mono{font-family:monospace;font-size:12px;word-break:break-all}
+.green{color:#00ff9d}.red{color:#ff5c5c}
+.row{display:flex;gap:10px}.row button{flex:1}
+.footer{text-align:center;font-size:11px;color:#666;margin-top:16px}
 </style>
 </head>
 <body>
-<div class="card">
-  <!-- LOGIN -->
-  <div id="loginView">
-    <h2>QTRUST V3</h2>
-    <div class="sub">Quantum Secure Wallet • Chain 20949</div>
-    <input type="password" id="pass" placeholder="Password (min 8 chars)">
-    <input type="password" id="cpass" placeholder="Confirm Password">
-    <div id="status"></div>
-    <button class="primary" id="createBtn">Create / Unlock Wallet</button>
-    <button class="secondary" id="importBtn">Import Wallet</button>
-    <div id="importBox" class="hidden">
-      <input type="text" id="mnemonicInput" placeholder="Enter 12 words seed phrase">
-      <button class="primary" id="doImportBtn">Import Now</button>
-    </div>
-  </div>
 
-  <!-- WALLET -->
-  <div id="walletView" class="hidden">
-    <h2>Wallet Unlocked</h2>
-    <div class="sub">Quantum Chain • ID 20949</div>
-    <div class="addr" id="addr"></div>
-    <div class="mnemonic hidden" id="mnemoBox"></div>
-    <button class="secondary" id="showSeedBtn">Show Seed Phrase</button>
-    <button class="primary" id="connectChainBtn">Connect to Chain 20949</button>
-    <button class="secondary" id="lockBtn">Lock Wallet</button>
-    <button class="secondary" id="logoutBtn" style="color:#f87171">Logout & Clear</button>
-  </div>
+<div class="top">
+<h1>QTRUST<span>CHAIN</span></h1>
+<p class="small">Your Own Chain • Powered by Algorand</p>
+<div><span class="badge">TESTNET ONLY • NO REAL MONEY</span></div>
+<div><span class="badge2">Backend: Algorand Testnet • No Pera</span></div>
 </div>
 
-<script>
-const $ = id => document.getElementById(id);
-const statusEl = $('status');
+<div class="card">
+<h3>🔑 1. Your QTrust Wallet</h3>
+<p class="small" id="walletStatus">No wallet yet. Create new wallet below.</p>
+<div id="walletBox" style="display:none;margin-top:10px">
+<div class="addr" id="showAddr"></div>
+<p class="small" style="margin-top:8px">Balance: <b class="green" id="showBal">Loading...</b></p>
+<p class="small">QTRUST Balance: <b class="green" id="showQtrust">-</b></p>
+</div>
+<div class="row">
+<button onclick="createWallet()">Create Wallet</button>
+<button class="sec" onclick="showImport()">Import Wallet</button>
+</div>
+<div id="importBox" style="display:none">
+<input id="importPhrase" placeholder="Paste 25 words recovery phrase">
+<button class="sec" onclick="importWallet()">Import Now</button>
+</div>
+<div id="newPhraseBox" style="display:none">
+<p class="small" style="color:#ffb800">⚠️ SAVE THIS - 25 WORDS - Screenshot le lo:</p>
+<div class="addr" id="newPhrase" style="color:#ffb800"></div>
+<button class="warn" onclick="copyPhrase()">Copy Phrase</button>
+</div>
+<button class="sec" onclick="checkBalance()">Refresh Balance</button>
+</div>
 
-function showView(walletData, showSeed=false){
-  $('loginView').classList.add('hidden');
-  $('walletView').classList.remove('hidden');
-  $('addr').innerText = walletData.address;
-  if(showSeed){
-    $('mnemoBox').innerText = walletData.mnemonic;
-    $('mnemoBox').classList.remove('hidden');
+<div class="card">
+<h3>💸 2. Send ALGO (Testnet)</h3>
+<input id="toAddr" placeholder="To Address - Paste receiver address">
+<input id="amount" type="number" placeholder="Amount - e.g. 0.1">
+<button onclick="sendAlgo()">Send ALGO - Testnet</button>
+<p class="small" id="sendStatus"></p>
+</div>
+
+<div class="card">
+<h3>🪙 3. Get Free Test ALGO</h3>
+<p class="small">1. Copy your address from above<br>2. Open Faucet - Paste address - Get 10 Free ALGO<br>3. Come back - Refresh Balance dabao</p>
+<button class="sec" onclick="window.open('https://bank.testnet.algorand.network/','_blank')">Open Testnet Faucet</button>
+<button class="sec" onclick="window.open('https://lora.algokit.io/testnet','_blank')">Open Explorer - Testnet</button>
+</div>
+
+<div class="card">
+<h3>📜 4. QTRUST Coin Info</h3>
+<p class="small">Name: <b>QTRUST</b><br>Network: Algorand Testnet<br>Supply: 10,000,000 QTRUST<br>Backend: Algorand Only<br>Pera: Not Required</p>
+<p class="small" style="margin-top:8px">Coin abhi Step 3 me banega. Pehle wallet bana lo.</p>
+</div>
+
+<div class="footer">QTrustChain • Testnet • Backend: Algorand • No Pera • No Real Money</div>
+
+<script>
+const ALGOD = "https://testnet-api.algonode.cloud";
+const INDEXER = "https://testnet-idx.algonode.cloud";
+let myAccount = null;
+let myMnemonic = "";
+
+function saveWallet(){
+  if(myAccount){
+    localStorage.setItem("qtrust_addr", myAccount.addr);
+    localStorage.setItem("qtrust_mn", myMnemonic);
   }
 }
-
-$('createBtn').onclick = async ()=>{
-  const p = $('pass').value, cp = $('cpass').value;
-  if(p.length < 8) return statusEl.innerText = "Password min 8 chars";
-  const stored = localStorage.getItem('qtrust_enc');
-  if(stored){
+function loadWallet(){
+  let addr = localStorage.getItem("qtrust_addr");
+  let mn = localStorage.getItem("qtrust_mn");
+  if(addr && mn){
     try{
-      const dec = CryptoJS.AES.decrypt(stored, p).toString(CryptoJS.enc.Utf8);
-      if(!dec) throw Error();
-      const data = JSON.parse(dec);
-      showView(data);
-      localStorage.setItem('qtrust_unlocked','1');
-      statusEl.innerText="";
-    }catch{ statusEl.innerText="Wrong Password!"; }
-  } else {
-    if(p!==cp) return statusEl.innerText="Passwords not match";
-    const w = ethers.Wallet.createRandom();
-    const data = {address:w.address, mnemonic:w.mnemonic.phrase, privateKey:w.privateKey};
-    const enc = CryptoJS.AES.encrypt(JSON.stringify(data), p).toString();
-    localStorage.setItem('qtrust_enc', enc);
-    localStorage.setItem('qtrust_unlocked','1');
-    showView(data,true);
+      let sk = algosdk.mnemonicToSecretKey(mn);
+      myAccount = sk; myMnemonic = mn;
+      document.getElementById("walletBox").style.display="block";
+      document.getElementById("showAddr").innerText = addr;
+      document.getElementById("walletStatus").innerText = "Wallet Loaded from Browser";
+      checkBalance();
+    }catch(e){}
   }
-};
-
-$('importBtn').onclick = ()=> $('importBox').classList.toggle('hidden');
-
-$('doImportBtn').onclick = async ()=>{
-  const phrase = $('mnemonicInput').value.trim();
-  const p = $('pass').value;
-  if(p.length<8) return statusEl.innerText="Set password first";
-  if(phrase.split(' ').length < 12) return statusEl.innerText="Enter 12 words";
+}
+function createWallet(){
+  let acc = algosdk.generateAccount();
+  myAccount = acc;
+  myMnemonic = algosdk.secretKeyToMnemonic(acc.sk);
+  document.getElementById("walletBox").style.display="block";
+  document.getElementById("showAddr").innerText = acc.addr;
+  document.getElementById("walletStatus").innerText = "New Wallet Created!";
+  document.getElementById("newPhraseBox").style.display="block";
+  document.getElementById("newPhrase").innerText = myMnemonic;
+  saveWallet();
+  checkBalance();
+  alert("Wallet ban gaya! 25 words ko screenshot le lo. Address: " + acc.addr);
+}
+function showImport(){ document.getElementById("importBox").style.display="block"; }
+function importWallet(){
+  let phrase = document.getElementById("importPhrase").value.trim();
   try{
-    const w = ethers.Wallet.fromPhrase(phrase);
-    const data = {address:w.address, mnemonic:phrase, privateKey:w.privateKey};
-    const enc = CryptoJS.AES.encrypt(JSON.stringify(data), p).toString();
-    localStorage.setItem('qtrust_enc', enc);
-    localStorage.setItem('qtrust_unlocked','1');
-    showView(data,false);
-  }catch(e){ statusEl.innerText="Invalid seed phrase"; }
-};
+    let acc = algosdk.mnemonicToSecretKey(phrase);
+    myAccount = acc; myMnemonic = phrase;
+    document.getElementById("walletBox").style.display="block";
+    document.getElementById("showAddr").innerText = acc.addr;
+    document.getElementById("walletStatus").innerText = "Wallet Imported!";
+    saveWallet(); checkBalance();
+    alert("Import ho gaya!");
+  }catch(e){ alert("Galat phrase hai - 25 words sahi se dalo"); }
+}
+function copyPhrase(){ navigator.clipboard.writeText(myMnemonic); alert("Copy ho gaya!"); }
 
-$('showSeedBtn').onclick = ()=>{
-  $('mnemoBox').classList.toggle('hidden');
-};
-
-$('connectChainBtn').onclick = async ()=>{
-  const CHAIN_ID_HEX = '0x51DD';
+async function checkBalance(){
+  if(!myAccount) return;
   try{
-    if(window.ethereum){
-      await window.ethereum.request({method:'wallet_addEthereumChain', params:[{chainId:CHAIN_ID_HEX, chainName:'QTRUST Quantum Chain', rpcUrls:['https://rpc.qtrustchain.com'], nativeCurrency:{name:'QTRUST', symbol:'QTRUST', decimals:18}, blockExplorerUrls:['https://explorer.qtrustchain.com']}]});
-      alert('Chain 20949 Connected!');
-    } else {
-      alert('QTRUST Chain ID: 20949 (0x51DD) - Add to Metamask manually');
-    }
-  }catch(e){ alert(e.message); }
-};
+    document.getElementById("showBal").innerText = "Loading...";
+    let res = await fetch(ALGOD + "/v2/accounts/" + myAccount.addr, {headers:{"X-Algo-API-Token":""}});
+    let data = await res.json();
+    let algo = (data.amount / 1000000).toFixed(4);
+    document.getElementById("showBal").innerText = algo + " ALGO (Testnet)";
+    // QTRUST check later
+    document.getElementById("showQtrust").innerText = "Will show after Coin creation";
+  }catch(e){ document.getElementById("showBal").innerText = "Error - Try again"; }
+}
 
-$('lockBtn').onclick = ()=>{
-  $('walletView').classList.add('hidden');
-  $('loginView').classList.remove('hidden');
-  $('pass').value=''; $('cpass').value='';
-  localStorage.removeItem('qtrust_unlocked');
-};
-
-$('logoutBtn').onclick = ()=>{
-  if(confirm('Delete wallet from this device?')){
-    localStorage.clear();
-    location.reload();
+async function sendAlgo(){
+  if(!myAccount){ alert("Pehle wallet banao"); return; }
+  let to = document.getElementById("toAddr").value.trim();
+  let amt = parseFloat(document.getElementById("amount").value);
+  if(!to || !amt){ alert("Address aur Amount dalo"); return; }
+  document.getElementById("sendStatus").innerText = "Sending... Wait 5 sec...";
+  try{
+    let client = new algosdk.Algodv2("", ALGOD, "");
+    let params = await client.getTransactionParams().do();
+    let txn = algosdk.makePaymentTxnWithSuggestedParamsFromObject({
+      sender: myAccount.addr,
+      receiver: to,
+      amount: Math.round(amt*1000000),
+      suggestedParams: params
+    });
+    let signed = txn.signTxn(myAccount.sk);
+    let {txId} = await client.sendRawTransaction(signed).do();
+    await algosdk.waitForConfirmation(client, txId, 4);
+    document.getElementById("sendStatus").innerHTML = "<span class='green'>✅ Sent! TxID: "+txId+"</span>";
+    checkBalance();
+  }catch(e){
+    document.getElementById("sendStatus").innerHTML = "<span class='red'>❌ Failed: "+e.message+"</span>";
   }
-};
+}
+loadWallet();
 </script>
 </body>
 </html>
