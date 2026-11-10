@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>QTrust - Final</title>
+<title>QTrust - Final V2</title>
 <script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.umd.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
 <style>
@@ -67,7 +67,7 @@ input,select{width:100%;padding:13px;border-radius:10px;border:none;margin:8px 0
 
 <div id="loginPage" class="login-wrap">
 <div style="font-size:52px">🏦</div><h1>QTRUST</h1>
-<p style="color:#aaa;font-size:14px">100% REAL + FALCON512 ✅</p>
+<p style="color:#aaa;font-size:14px">100% REAL + FALCON512 ✅ V2</p>
 <div class="card" style="text-align:left">
 <p style="font-size:13px;color:#aaa">Mobile Number</p>
 <div class="mob-row"><select id="countryCode"><option value="+91">🇮🇳 +91 India</option><option value="+1">🇺🇸 +1 USA</option><option value="+44">🇬🇧 +44 UK</option><option value="+971">🇦🇪 +971 Dubai</option><option value="+966">🇸🇦 +966 Saudi</option><option value="+92">🇵🇰 +92 Pakistan</option><option value="+880">🇧🇩 +880 Bangladesh</option></select><input id="mobileNum" type="tel" value="7906641577"></div>
@@ -114,7 +114,6 @@ let prices={BTC:0,ETH:0},priceChange={BTC:0,ETH:0},chartCoin='BTC',timeRangeDays
 async function sha256Hex(s){const b=await crypto.subtle.digest('SHA-256',new TextEncoder().encode(s));return Array.from(new Uint8Array(b)).map(x=>x.toString(16).padStart(2,'0')).join('');}
 async function sha512Hex(s){const b=await crypto.subtle.digest('SHA-512',new TextEncoder().encode(s));return Array.from(new Uint8Array(b)).map(x=>x.toString(16).padStart(2,'0')).join('');}
 async function shake256Like(input,len=64){let o="",c=0;while(o.length<len*2){o+=await sha512Hex(input+"|SHAKE256|"+c);c++;}return o.slice(0,len*2);}
-// RIPEMD160 + BECH32 - BTC POORA bc1q Ke Liye - No bitcoinjs
 function ripemd160(inputBytes){
 function rol(x,n){return ((x<<n)|(x>>>(32-n)))>>>0;}
 function f1(x,y,z){return x^y^z;}function f2(x,y,z){return (x&y)|(~x&z);}function f3(x,y,z){return (x|~y)^z;}function f4(x,y,z){return (x&z)|(y&~z);}function f5(x,y,z){return x^(y|~z);}
@@ -145,7 +144,7 @@ async function hybridVerify(msg,hyb,mobile){let e=await verifySignature(msg,hyb.
 async function verifyLastSignature(){if(!lastHybrid){alert("Pehle SEND Karo!");return;}let v=await hybridVerify(lastSignedMessage,lastHybrid,currentMobile);if(v.bothPass){document.getElementById('auditVerifyBox').className="audit-ok";document.getElementById('auditVerifyBox').innerHTML="✅ Hybrid Verify Ho Gaya!<br>ECDSA: ✅ "+v.ecdsa.recovered+"<br>FALCON512: ✅ "+v.falcon.reason;alert("✅ Dono VALID Hai!");}else{document.getElementById('auditVerifyBox').className="audit-fail";document.getElementById('auditVerifyBox').innerHTML="❌ FAIL!";alert("❌ FAIL!");}}
 function copyAudit(){navigator.clipboard.writeText(lastAuditText||document.getElementById('audit').innerText);alert("Audit Copy Ho Gaya! ✅");}
 async function fetchRealChart(){let coinId=chartCoin=='BTC'?'bitcoin':'ethereum';document.getElementById('chartSource').innerText="REAL - CoinGecko Se...";try{let res=await fetch(`https://api.coingecko.com/api/v3/coins/${coinId}/market_chart?vs_currency=usd&days=${timeRangeDays}`);let d=await res.json();if(!d.prices)throw new Error("CoinGecko Limit - 1 Min Ruko!");let labels=d.prices.map(p=>{let dt=new Date(p[0]);if(timeRangeDays=='1')return dt.getHours()+":"+String(dt.getMinutes()).padStart(2,'0');return dt.getDate()+"/"+(dt.getMonth()+1);});let data=d.prices.map(p=>p[1]);prices[chartCoin]=data[data.length-1];drawRealChart(labels,data);document.getElementById('chartSource').innerText="✅ REAL - CoinGecko - "+d.prices.length+" Points!";updatePriceUI();}catch(e){document.getElementById('chartSource').innerText="⚠️ "+e.message;}}
-function drawRealChart(labels,data){let ctx=document.getElementById('priceChart').getContext('2d');if(myChart)myChart.destroy();let up=data[data.length-1]>=data[0];myChart=new Chart(ctx,{type:'line',data:{labels,datasets:[{data,borderColor:up?'#2ecc71':'#ff4757',backgroundColor:up?'rgba(46,204,113,0.15)':'rgba(255,71,87,0.15)',fill:true,tension:0.4,pointRadius:0,borderWidth:2}]},options:{responsive:true,plugins:{legend:{display:false},tooltip:{callbacks:{label:(c)=>"REAL: $"+Number(c.raw).toLocaleString()}}},scales:{x:{grid:{color:'#222'},ticks:{color:'#888',maxTicksLimit:6}},y:{grid:{color:'#222'},ticks:{color:'#aaa',callback:v=>"$"+Math.round(v).toLocaleString()}}}}});}
+function drawRealChart(labels,data){let ctx=document.getElementById('priceChart').getContext('2d');if(myChart)myChart.destroy();let up=data[data.length-1]>=data[0];myChart=new Chart(ctx,{type:'line',data:{labels,[STRIPPED] $"+Number(c.raw).toLocaleString()}}},scales:{x:{grid:{color:'#222'},ticks:{color:'#888',maxTicksLimit:6}},y:{grid:{color:'#222'},ticks:{color:'#aaa',callback:v=>"$"+Math.round(v).toLocaleString()}}}}});}
 async function fetchLivePrice(){try{let res=await fetch("https://api.coingecko.com/api/v3/simple/price?ids=bitcoin,ethereum&vs_currencies=usd&include_24hr_change=true&include_24hr_high=true&include_24hr_low=true&include_24hr_vol=true");let d=await res.json();if(d.bitcoin){prices.BTC=d.bitcoin.usd;priceChange.BTC=d.bitcoin.usd_24h_change;document.getElementById('highPrice').innerText="$"+Math.round(d.bitcoin.usd_24h_high).toLocaleString();document.getElementById('lowPrice').innerText="$"+Math.round(d.bitcoin.usd_24h_low).toLocaleString();document.getElementById('volPrice').innerText="$"+(d.bitcoin.usd_24h_vol/1e9).toFixed(1)+"B";}if(d.ethereum){prices.ETH=d.ethereum.usd;priceChange.ETH=d.ethereum.usd_24h_change;}updatePriceUI();}catch(e){}}
 function updatePriceUI(){if(prices.BTC>0){document.getElementById('btcLivePrice').innerText="$"+prices.BTC.toLocaleString()+" • "+(priceChange.BTC>=0?"▲ +":"▼ ")+priceChange.BTC.toFixed(2)+"%";document.getElementById('ethLivePrice').innerText="$"+prices.ETH.toLocaleString()+" • "+(priceChange.ETH>=0?"▲ +":"▼ ")+priceChange.ETH.toFixed(2)+"%";document.getElementById('chartPrice').innerText="$"+prices[chartCoin].toLocaleString();document.getElementById('chartChange').innerText=(priceChange[chartCoin]>=0?"▲ +":"▼ ")+priceChange[chartCoin].toFixed(2)+"% (24h)";document.getElementById('chartChange').className=priceChange[chartCoin]>=0?"green":"red";}updateUI();}
 function switchChartCoin(c){chartCoin=c;document.getElementById('cTabBTC').className='chart-tab'+(c=='BTC'?' active':'');document.getElementById('cTabETH').className='chart-tab'+(c=='ETH'?' active':'');document.getElementById('chartCoinName').innerText=c=='BTC'?'₿ Bitcoin':'◆ Ethereum';document.getElementById('chartPair').innerText=c+' / USD';fetchRealChart();}
@@ -170,7 +169,7 @@ document.getElementById('sendResult').innerText="Signature Pass ✅ - REAL Send 
 let txHash="",explorer="";
 try{let url=selected=='ETH'?backendUrl+'/send-eth':backendUrl+'/send-btc';let res=await fetch(url,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({mobile:currentMobile,to,amount:amt,signature:hyb.ecdsaSig,falconSignature:hyb.falconSig,falconPublic:hyb.falconPublic,message:msg})});let data=await res.json();if(data.success){txHash=data.hash||data.txid;explorer=data.explorer;document.getElementById('sendResult').innerHTML="✅ REAL SEND HO GAYA!<br>Tx: "+txHash;}else{txHash="FAILED: "+data.error;document.getElementById('sendResult').innerText="⚠️ Backend Fail: "+data.error;}}catch(e){txHash="BACKEND NOT RUNNING";document.getElementById('sendResult').innerText="⚠️ Backend Nahi Chala - Signature Pass Tha!";}
 let tt=Math.round(performance.now()-st);
-lastAuditText=`=== QTRUST FALCON512 AUDIT ===\nStatus: ✅ PASS - QUANTUM SAFE\nTime: ${new Date().toLocaleString()}\nMobile: ${currentMobile}\nPQID: ${currentPQID}\nFALCON PQID: ${hyb.falconPQID}\nFace: ✅ MATCHED\nTX: SEND ${amt} ${selected}\nFrom: ${addrs[selected]}\nTo: ${to}\nPrice: $${prices[selected]}\nECDSA: ${hyb.ecdsaSig}\nSigner: ${v.ecdsa.recovered} ✅ VALID\nFALCON512: ${hyb.falconSig.slice(0,200)}...\nPublic: ${hyb.falconPublic}\nVerify: ✅ VALID\nHybrid: ✅ PASS\nTx: ${txHash}\nExplorer: ${explorer}\nTime: ${tt}ms\nQTrust v5.0 Final`;
+lastAuditText=`=== QTRUST FALCON512 AUDIT ===\nStatus: ✅ PASS - QUANTUM SAFE\nTime: ${new Date().toLocaleString()}\nMobile: ${currentMobile}\nPQID: ${currentPQID}\nFALCON PQID: ${hyb.falconPQID}\nFace: ✅ MATCHED\nTX: SEND ${amt} ${selected}\nFrom: ${addrs[selected]}\nTo: ${to}\nPrice: $${prices[selected]}\nECDSA: ${hyb.ecdsaSig}\nSigner: ${v.ecdsa.recovered} ✅ VALID\nFALCON512: ${hyb.falconSig.slice(0,200)}...\nPublic: ${hyb.falconPublic}\nVerify: ✅ VALID\nHybrid: ✅ PASS\nTx: ${txHash}\nExplorer: ${explorer}\nTime: ${tt}ms\nQTrust v5.0 Final V2`;
 document.getElementById('audit').innerText=lastAuditText;
 document.getElementById('history').innerHTML="✅ SENT "+amt+" "+selected+" -> "+to+"<br>ECDSA ✅ + FALCON512 ✅<br>Tx: "+txHash+"<br><br>"+document.getElementById('history').innerHTML;
 alert("✅ HO GAYA!\nECDSA + FALCON512 PASS ✅\nTx: "+txHash);
@@ -193,7 +192,19 @@ let last4=fullMobile.replace(/[^0-9]/g,"").slice(-4);
 let pqid="PQID@"+last4+"_"+privateKeyHex.slice(0,3).toUpperCase();
 return{pqid,btcAddr,ethAddr,mobile:fullMobile};
 }
-async function getOrCreateIdentity(fullMobile){let clean=fullMobile.replace(/[^0-9+]/g,"");let key="QTRUST_REAL_"+clean;let saved=localStorage.getItem(key);if(saved){return{data:JSON.parse(saved),isOld:true};}let data=await makeRealIdentity(fullMobile);localStorage.setItem(key,JSON.stringify(data));return{data,isOld:false};}
+async function getOrCreateIdentity(fullMobile){
+let clean=fullMobile.replace(/[^0-9+]/g,"");
+let key="QTRUST_REAL_V2_"+clean;
+let saved=localStorage.getItem(key);
+if(saved){
+let d=JSON.parse(saved);
+if(d.btcAddr && d.btcAddr.length>30 && d.btcAddr.startsWith("bc1q")){return{data:d,isOld:true};}
+localStorage.removeItem(key);
+}
+let data=await makeRealIdentity(fullMobile);
+localStorage.setItem(key,JSON.stringify(data));
+return{data,isOld:false};
+}
 async function doFaceScan(){
 let code=document.getElementById('countryCode').value;let num=document.getElementById('mobileNum').value.trim().replace(/[^0-9]/g,"");
 if(!num||num.length<7){alert("Sahi Mobile Daalo!");return;}
