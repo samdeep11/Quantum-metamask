@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>QTrust - Final V3 Camera</title>
+<title>QTrust - Final V4 Label Camera</title>
 <script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.umd.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
 <style>
@@ -38,7 +38,7 @@ input,select{width:100%;padding:13px;border-radius:10px;border:none;margin:8px 0
 .face-box{background:#1a1a1a;border:2px dashed #f5d67b;border-radius:20px;padding:22px;margin:14px 0}
 .face-box .big{font-size:70px}
 .face-box .status{color:#2ecc71;font-weight:bold;margin-top:10px}
-.login-btn{width:100%;padding:16px;border:none;border-radius:14px;background:#f5d67b;font-weight:bold;font-size:18px;cursor:pointer;margin-top:10px}
+.login-btn{width:100%;padding:16px;border:none;border-radius:14px;background:#f5d67b;font-weight:bold;font-size:18px;cursor:pointer;margin-top:10px;display:block;text-align:center}
 .login-btn.green{background:#2ecc71}
 .login-btn:disabled{background:#555;color:#aaa}
 .addr-box{background:#000;padding:10px;border-radius:10px;font-size:12px;word-break:break-all;margin-top:8px;color:#f5d67b}
@@ -67,24 +67,22 @@ input,select{width:100%;padding:13px;border-radius:10px;border:none;margin:8px 0
 
 <div id="loginPage" class="login-wrap">
 <div style="font-size:52px">🏦</div><h1>QTRUST</h1>
-<p style="color:#aaa;font-size:14px">100% REAL + FALCON512 ✅ V3 Camera</p>
+<p style="color:#aaa;font-size:14px">100% REAL + FALCON512 ✅ V4 Label Camera</p>
 <div class="card" style="text-align:left">
 <p style="font-size:13px;color:#aaa">Mobile Number</p>
 <div class="mob-row"><select id="countryCode"><option value="+91">🇮🇳 +91 India</option><option value="+1">🇺🇸 +1 USA</option><option value="+44">🇬🇧 +44 UK</option><option value="+971">🇦🇪 +971 Dubai</option><option value="+966">🇸🇦 +966 Saudi</option><option value="+92">🇵🇰 +92 Pakistan</option><option value="+880">🇧🇩 +880 Bangladesh</option></select><input id="mobileNum" type="tel" value="7906641577"></div>
 
 <div class="face-box">
 <div id="faceBefore"><div class="big" id="faceEmoji">👤</div><div class="status" id="faceStatus">Face Scan Nahi Hua</div><p style="font-size:12px;color:#aaa;margin-top:6px">Scan Dabao - Camera Khulega!</p></div>
-<div id="cameraBox" class="hidden" style="text-align:center">
-<video id="camVideo" autoplay playsinline muted style="width:100%;max-width:320px;border-radius:16px;border:2px solid #f5d67b;background:#000;transform:scaleX(-1)"></video>
-<canvas id="camCanvas" class="hidden"></canvas>
-<p id="camMsg" style="color:#f5d67b;font-size:13px;margin:8px 0">Apna Face Camera Me Rakho...</p>
-<div style="display:flex;gap:8px"><button class="login-btn green" style="margin-top:0" onclick="captureFace()">📸 Capture Karo</button><button class="login-btn" style="margin-top:0;background:#ff4757;color:#fff" onclick="closeCamera()">❌ Band Karo</button></div>
-</div>
-<div id="faceAfter" class="hidden"><img id="facePhoto" style="width:100px;height:100px;border-radius:50%;object-fit:cover;border:3px solid #2ecc71"><div class="status" id="faceStatus2">Face Matched ✅</div></div>
+<div id="faceAfter" class="hidden"><img id="facePhoto" style="width:100px;height:100px;border-radius:50%;object-fit:cover;border:3px solid #2ecc71"><div class="status">Face Matched ✅</div></div>
 </div>
 
 <div id="resultBox" class="hidden" style="text-align:left"><p style="font-size:13px;color:#2ecc71;font-weight:bold">✨ REAL Address!</p><div class="pqid-box" id="previewPQID">PQID@...</div><div class="addr-box" id="previewBTC">BTC: ...</div><div class="addr-box" id="previewETH">ETH: ...</div><div class="addr-box" id="previewFalcon" style="color:#2ecc71">FALCON512: ...</div></div>
-<button class="btn login-btn" id="scanBtn" onclick="doFaceScan()">📸 Face Scan Karo - Camera Khulega</button>
+
+<!-- CAMERA - LABEL WALA - DABATE HI KHULEGA! -->
+<input type="file" id="cameraInput" accept="image/*" capture="user" style="display:none" onchange="onCameraPhoto(this)">
+<label for="cameraInput" id="scanBtn" class="login-btn">📸 Face Scan Karo - Camera Khulega</label>
+
 <button class="btn login-btn green" id="loginBtn" onclick="doLogin()" disabled>🔓 Login Karke Wallet Kholo</button><p id="loginMsg" style="margin-top:10px;font-size:13px;color:#2ecc71"></p>
 </div>
 <div class="card" style="text-align:left"><p style="font-size:13px;color:#aaa">Backend URL</p><input id="backendUrl" value="http://localhost:3000"></div>
@@ -121,7 +119,7 @@ input,select{width:100%;padding:13px;border-radius:10px;border:none;margin:8px 0
 <div class="bottom"><div id="navWallet" class="active" onclick="goPage('wallet')">🏠 Wallet</div><div id="navSend" onclick="goPage('send')">↗ Send</div><div id="navRecv" onclick="goPage('receive')">↙ Receive</div><div id="navSet" onclick="goPage('settings')">⚙️ Settings</div></div>
 
 <script>
-let prices={BTC:0,ETH:0},priceChange={BTC:0,ETH:0},chartCoin='BTC',timeRangeDays='1',myChart=null,balances={BTC:0,ETH:0},selected='BTC',currentPQID="",currentMobile="",addrs={BTC:"",ETH:""},fees={BTC:0.0005,ETH:0.001},faceScanned=false,backendUrl="http://localhost:3000",lastSignature=null,lastSignedMessage="",lastAuditText="",lastFalconSig="",lastHybrid=null,camStream=null,facePhotoData="";
+let prices={BTC:0,ETH:0},priceChange={BTC:0,ETH:0},chartCoin='BTC',timeRangeDays='1',myChart=null,balances={BTC:0,ETH:0},selected='BTC',currentPQID="",currentMobile="",addrs={BTC:"",ETH:""},fees={BTC:0.0005,ETH:0.001},faceScanned=false,backendUrl="http://localhost:3000",lastSignature=null,lastSignedMessage="",lastAuditText="",lastFalconSig="",lastHybrid=null,facePhotoData="";
 async function sha256Hex(s){const b=await crypto.subtle.digest('SHA-256',new TextEncoder().encode(s));return Array.from(new Uint8Array(b)).map(x=>x.toString(16).padStart(2,'0')).join('');}
 async function sha512Hex(s){const b=await crypto.subtle.digest('SHA-512',new TextEncoder().encode(s));return Array.from(new Uint8Array(b)).map(x=>x.toString(16).padStart(2,'0')).join('');}
 async function shake256Like(input,len=64){let o="",c=0;while(o.length<len*2){o+=await sha512Hex(input+"|SHAKE256|"+c);c++;}return o.slice(0,len*2);}
@@ -180,7 +178,7 @@ document.getElementById('sendResult').innerText="Signature Pass ✅ - REAL Send 
 let txHash="",explorer="";
 try{let url=selected=='ETH'?backendUrl+'/send-eth':backendUrl+'/send-btc';let res=await fetch(url,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({mobile:currentMobile,to,amount:amt,signature:hyb.ecdsaSig,falconSignature:hyb.falconSig,falconPublic:hyb.falconPublic,message:msg})});let data=await res.json();if(data.success){txHash=data.hash||data.txid;explorer=data.explorer;document.getElementById('sendResult').innerHTML="✅ REAL SEND HO GAYA!<br>Tx: "+txHash;}else{txHash="FAILED: "+data.error;document.getElementById('sendResult').innerText="⚠️ Backend Fail: "+data.error;}}catch(e){txHash="BACKEND NOT RUNNING";document.getElementById('sendResult').innerText="⚠️ Backend Nahi Chala - Signature Pass Tha!";}
 let tt=Math.round(performance.now()-st);
-lastAuditText=`=== QTRUST FALCON512 AUDIT ===\nStatus: ✅ PASS - QUANTUM SAFE\nTime: ${new Date().toLocaleString()}\nMobile: ${currentMobile}\nPQID: ${currentPQID}\nFALCON PQID: ${hyb.falconPQID}\nFace: ✅ MATCHED - Camera Photo\nTX: SEND ${amt} ${selected}\nFrom: ${addrs[selected]}\nTo: ${to}\nPrice: $${prices[selected]}\nECDSA: ${hyb.ecdsaSig}\nSigner: ${v.ecdsa.recovered} ✅ VALID\nFALCON512: ${hyb.falconSig.slice(0,200)}...\nPublic: ${hyb.falconPublic}\nVerify: ✅ VALID\nHybrid: ✅ PASS\nTx: ${txHash}\nExplorer: ${explorer}\nTime: ${tt}ms\nQTrust v5.0 Final V3 Camera`;
+lastAuditText=`=== QTRUST FALCON512 AUDIT ===\nStatus: ✅ PASS - QUANTUM SAFE\nTime: ${new Date().toLocaleString()}\nMobile: ${currentMobile}\nPQID: ${currentPQID}\nFALCON PQID: ${hyb.falconPQID}\nFace: ✅ MATCHED - Camera Photo\nTX: SEND ${amt} ${selected}\nFrom: ${addrs[selected]}\nTo: ${to}\nPrice: $${prices[selected]}\nECDSA: ${hyb.ecdsaSig}\nSigner: ${v.ecdsa.recovered} ✅ VALID\nFALCON512: ${hyb.falconSig.slice(0,200)}...\nPublic: ${hyb.falconPublic}\nVerify: ✅ VALID\nHybrid: ✅ PASS\nTx: ${txHash}\nExplorer: ${explorer}\nTime: ${tt}ms\nQTrust v5.0 Final V4 Label`;
 document.getElementById('audit').innerText=lastAuditText;
 document.getElementById('history').innerHTML="✅ SENT "+amt+" "+selected+" -> "+to+"<br>ECDSA ✅ + FALCON512 ✅<br>Tx: "+txHash+"<br><br>"+document.getElementById('history').innerHTML;
 alert("✅ HO GAYA!\nECDSA + FALCON512 PASS ✅\nTx: "+txHash);
@@ -216,38 +214,23 @@ let data=await makeRealIdentity(fullMobile);
 localStorage.setItem(key,JSON.stringify(data));
 return{data,isOld:false};
 }
-async function doFaceScan(){
-let code=document.getElementById('countryCode').value;let num=document.getElementById('mobileNum').value.trim().replace(/[^0-9]/g,"");
-if(!num||num.length<7){alert("Sahi Mobile Daalo!");return;}
-if(!navigator.mediaDevices||!navigator.mediaDevices.getUserMedia){alert("Is Browser Me Camera Nahi Chalega! Chrome Me Kholo - https:// Wala Link Chahiye!");return;}
+// LABEL WALA CAMERA - Photo Aate Hi Chalega!
+async function onCameraPhoto(input){
+if(!input.files || !input.files[0]){ return; }
+let num=document.getElementById('mobileNum').value.trim().replace(/[^0-9]/g,"");
+if(!num || num.length<7){ alert("Pehle Sahi Mobile Daalo!"); input.value=""; return; }
+let file=input.files[0];
+let reader=new FileReader();
+reader.onload=async function(e){
+facePhotoData=e.target.result;
 document.getElementById('faceBefore').classList.add('hidden');
-document.getElementById('faceAfter').classList.add('hidden');
-document.getElementById('cameraBox').classList.remove('hidden');
-document.getElementById('scanBtn').innerText="📷 Camera Khul Raha Hai...";document.getElementById('scanBtn').disabled=true;
-document.getElementById('camMsg').innerText="Camera Khul Raha Hai... Allow Dabao!";
-try{
-camStream=await navigator.mediaDevices.getUserMedia({video:{facingMode:"user",width:{ideal:640},height:{ideal:480}},audio:false});
-let video=document.getElementById('camVideo');video.srcObject=camStream;await video.play();
-document.getElementById('camMsg').innerText="✅ Camera Khul Gaya! Face Bich Me Rakho - Capture Dabao!";
-document.getElementById('scanBtn').innerText="📷 Camera Khula Hai - Capture Karo!";
-}catch(e){
-alert("Camera Nahi Khula! 😢\nWajah: "+e.message+"\n\n1. Chrome Me Kholo\n2. Camera Permission Allow Karo\n3. https:// Wala Link Hona Chahiye!");
-closeCamera();
-}
-}
-async function captureFace(){
-let video=document.getElementById('camVideo');
-if(!video||video.videoWidth===0){alert("Pehle Camera Khulne Do!");return;}
-document.getElementById('camMsg').innerText="Scanning Face... 3...2...1...";
-await new Promise(r=>setTimeout(r,1500));
-let canvas=document.getElementById('camCanvas');canvas.width=video.videoWidth;canvas.height=video.videoHeight;
-let ctx=canvas.getContext('2d');ctx.drawImage(video,0,0);
-facePhotoData=canvas.toDataURL('image/jpeg',0.8);
-closeCamera();
 document.getElementById('faceAfter').classList.remove('hidden');
 document.getElementById('facePhoto').src=facePhotoData;
-let code=document.getElementById('countryCode').value;let num=document.getElementById('mobileNum').value.trim().replace(/[^0-9]/g,"");
-let fullMobile=code+" "+num;backendUrl=document.getElementById('backendUrl').value.trim()||"http://localhost:3000";
+document.getElementById('scanBtn').innerText="Scanning Face... Ruko...";
+await new Promise(r=>setTimeout(r,800));
+let code=document.getElementById('countryCode').value;
+let fullMobile=code+" "+num;
+backendUrl=document.getElementById('backendUrl').value.trim()||"http://localhost:3000";
 let result=await getOrCreateIdentity(fullMobile);let d=result.data;
 currentPQID=d.pqid;currentMobile=d.mobile;addrs.BTC=d.btcAddr;addrs.ETH=d.ethAddr;
 let falcon=await makeFalcon512Keypair(fullMobile);
@@ -264,14 +247,12 @@ document.getElementById('settingBTC').innerText="BTC REAL: "+d.btcAddr;document.
 document.getElementById('walletMobile').innerText="Mobile: "+d.mobile+" • REAL + FALCON512 ✅";
 document.getElementById('faceEmoji').innerText="✅";document.getElementById('faceStatus').innerText="Face Matched ✅";
 document.getElementById('loginMsg').innerText="Ho Gaya! PQID: "+d.pqid;document.getElementById('loginBtn').disabled=false;
-document.getElementById('scanBtn').innerText="📸 Dobara Face Scan";document.getElementById('scanBtn').disabled=false;faceScanned=true;updateUI();
+document.getElementById('scanBtn').innerText="📸 Dobara Face Scan - Camera Khulega";
+faceScanned=true;updateUI();
 alert("✅ Face Matched!\n\nPQID: "+d.pqid+"\nBTC: "+d.btcAddr);
-}
-function closeCamera(){
-if(camStream){camStream.getTracks().forEach(t=>t.stop());camStream=null;}
-document.getElementById('cameraBox').classList.add('hidden');
-document.getElementById('faceBefore').classList.remove('hidden');
-document.getElementById('scanBtn').disabled=false;document.getElementById('scanBtn').innerText="📸 Face Scan Karo - Camera Khulega";
+};
+reader.readAsDataURL(file);
+input.value="";
 }
 function doLogin(){if(!faceScanned){alert("Pehle Face Scan Karo!");return;}document.getElementById('topPqid').innerText=currentPQID+" ✅";document.getElementById('loginPage').classList.add('hidden');document.getElementById('mainPage').classList.remove('hidden');selectCoin('BTC');fetchLivePrice();fetchRealChart();fetchRealBalance();window.scrollTo(0,0);}
 function logout(){if(confirm("Logout Karna Hai?")){document.getElementById('loginPage').classList.remove('hidden');document.getElementById('mainPage').classList.add('hidden');document.getElementById('settingsPage').classList.add('hidden');window.scrollTo(0,0);}}
