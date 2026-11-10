@@ -1,294 +1,208 @@
 <!DOCTYPE html>
-<html>
+<html lang="hi">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>QTrust - Final V5 Wallet Fix</title>
+<title>QTrust - Quantum Wallet - FINAL</title>
 <script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.umd.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/liboqs-wasm@0.1.0/dist/liboqs.js"></script>
 <style>
-*{margin:0;padding:0;box-sizing:border-box;font-family:Arial}
-body{background:#0a0a0a;color:#fff;padding:14px;padding-bottom:110px}
-.hidden{display:none !important}
-.top{display:flex;justify-content:space-between;align-items:center}
-.top h2{color:#f5d67b}
-.pill{background:#222;padding:6px 12px;border-radius:20px;font-size:13px}
-.balance-card{background:linear-gradient(135deg,#1a3a8a,#001a4d);padding:20px;border-radius:20px;margin-top:14px;text-align:center}
-.balance-card .amt{font-size:36px;font-weight:bold;margin:6px 0}
-.tabs{display:flex;gap:10px;margin-top:14px}
-.tab{flex:1;padding:12px;border-radius:12px;text-align:center;background:#222;cursor:pointer;font-weight:bold;border:2px solid transparent}
-.tab.active{background:#f5d67b;color:#000;border-color:#fff}
-.coin{background:#1a1a1a;padding:14px;border-radius:16px;margin-top:12px;display:flex;justify-content:space-between;align-items:center;cursor:pointer;border:2px solid transparent}
-.coin.active{border-color:#f5d67b}
-.coin b{font-size:17px}.coin span{color:#aaa;font-size:12px;word-break:break-all}
-.green{color:#2ecc71}.red{color:#ff4757}
-.btn-row{display:flex;gap:10px;margin-top:14px}
-.btn{flex:1;padding:14px;border:none;border-radius:14px;font-weight:bold;font-size:16px;cursor:pointer}
-.btn-send{background:#f5d67b}.btn-recv{background:#2ecc71}
-.card{background:#1a1a1a;padding:16px;border-radius:16px;margin-top:14px}
-input,select{width:100%;padding:13px;border-radius:10px;border:none;margin:8px 0;font-size:15px;background:#2a2a2a;color:#fff}
-.hist{font-size:12px;color:#ccc;margin-top:8px;line-height:1.6;word-break:break-all;font-family:monospace;white-space:pre-wrap}
-.bottom{position:fixed;bottom:0;left:0;right:0;background:#111;display:flex;padding:10px;gap:8px;z-index:99}
-.bottom div{flex:1;text-align:center;padding:10px 4px;border-radius:12px;background:#222;font-size:13px;cursor:pointer}
-.bottom div.active{background:#f5d67b;color:#000;font-weight:bold}
-.qr{background:#fff;color:#000;padding:14px;border-radius:12px;text-align:center;font-size:13px;word-break:break-all;margin-top:10px}
-.fee{font-size:13px;color:#f5d67b;text-align:center}
-.login-wrap{max-width:420px;margin:0 auto;text-align:center;padding-top:20px}
-.login-wrap h1{color:#f5d67b;font-size:32px;margin:8px 0}
-.face-box{background:#1a1a1a;border:2px dashed #f5d67b;border-radius:20px;padding:22px;margin:14px 0}
-.face-box .big{font-size:70px}
-.face-box .status{color:#2ecc71;font-weight:bold;margin-top:10px}
-.login-btn{width:100%;padding:16px;border:none;border-radius:14px;background:#f5d67b;font-weight:bold;font-size:18px;cursor:pointer;margin-top:10px;display:block;text-align:center}
-.login-btn.green{background:#2ecc71}
-.login-btn:disabled{background:#555;color:#aaa}
-.addr-box{background:#000;padding:10px;border-radius:10px;font-size:12px;word-break:break-all;margin-top:8px;color:#f5d67b}
-.pqid-box{background:#f5d67b;color:#000;padding:12px;border-radius:12px;font-weight:bold;font-size:15px;text-align:center;margin-top:10px;word-break:break-all}
-.mob-row{display:flex;gap:8px}
-.mob-row select{flex:1.2}
-.mob-row input{flex:2}
-.chart-card{background:#1a1a1a;padding:14px;border-radius:16px;margin-top:14px}
-.chart-tabs{display:flex;gap:8px;margin-bottom:10px}
-.chart-tab{flex:1;padding:12px;border-radius:10px;text-align:center;background:#222;font-size:14px;font-weight:bold;cursor:pointer;border:2px solid transparent}
-.chart-tab.active{background:#f5d67b;color:#000;border-color:#fff}
-.time-tabs{display:flex;gap:6px;margin-top:10px}
-.time-tab{flex:1;padding:10px;border-radius:8px;text-align:center;background:#222;font-size:13px;cursor:pointer;border:2px solid transparent}
-.time-tab.active{background:#2ecc71;color:#fff;font-weight:bold;border-color:#fff}
-.price-row{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}
-.price-big{font-size:26px;font-weight:bold}
-.live-dot{width:8px;height:8px;background:#2ecc71;border-radius:50%;display:inline-block;animation:blink 1s infinite}
-@keyframes blink{0%{opacity:1}50%{opacity:0.2}100%{opacity:1}}
-.audit-box{background:#000;border:1px solid #2ecc71;padding:12px;border-radius:12px;margin-top:10px}
-.audit-ok{background:#002a00;border:1px solid #2ecc71;color:#7ed6a0;padding:10px;border-radius:10px;font-size:12px;margin-top:8px}
-.audit-fail{background:#2a0000;border:1px solid #ff4757;color:#ff8a8a;padding:10px;border-radius:10px;font-size:12px;margin-top:8px}
-.sig-box{background:#111;border:1px dashed #f5d67b;padding:10px;border-radius:10px;font-size:11px;word-break:break-all;color:#f5d67b;margin-top:8px}
+*{box-sizing:border-box}body{margin:0;background:#0a0a12;color:#fff;font-family:system-ui,Arial;padding:12px}
+.top{display:flex;justify-content:space-between;align-items:center;max-width:480px;margin:0 auto}
+.logo{font-weight:900;font-size:22px}.logo span{color:#f5d67b}
+.card{background:#15151f;border:1px solid #2a2a3a;border-radius:16px;padding:14px;max-width:480px;margin:12px auto}
+h3{margin:6px 0}.mut{color:#aaa;font-size:13px}.big{font-size:28px;font-weight:900}
+input{width:100%;padding:12px;border-radius:10px;border:1px solid #333;background:#0d0d15;color:#fff;margin:6px 0}
+.btn{width:100%;padding:13px;border:0;border-radius:12px;font-weight:800;cursor:pointer;margin-top:8px}
+.btn-y{background:#f5d67b;color:#000}.btn-g{background:#22c55e;color:#fff}.btn-d{background:#222;color:#fff}.btn-b{background:#2563eb;color:#fff}
+.row{display:flex;gap:8px}.row .btn{flex:1}
+.addr{word-break:break-all;background:#0d0d15;padding:10px;border-radius:10px;font-size:12px;border:1px solid #333}
+.mono{font-family:monospace;font-size:11px;word-break:break-all;white-space:pre-wrap;background:#0d0d15;padding:10px;border-radius:10px;border:1px solid #333;max-height:220px;overflow:auto}
+.badge{display:inline-block;padding:4px 10px;border-radius:20px;font-size:12px;font-weight:800;background:#1e2a1e;color:#4ade80}
+.badge-w{background:#2a2410;color:#f5d67b}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}.box{background:#0d0d15;border:1px solid #333;border-radius:12px;padding:10px}
 </style>
 </head>
 <body>
+<div class="top"><div class="logo">Q<span>Trust</span> 🛡️</div><div id="falconStatus" class="badge badge-w">FALCON: LOADING...</div></div>
 
-<div id="loginPage" class="login-wrap">
-<div style="font-size:52px">🏦</div><h1>QTRUST</h1>
-<p style="color:#aaa;font-size:14px">100% REAL + FALCON512 ✅ V5 Wallet Fix</p>
-<div class="card" style="text-align:left">
-<p style="font-size:13px;color:#aaa">Mobile Number</p>
-<div class="mob-row"><select id="countryCode"><option value="+91">🇮🇳 +91 India</option><option value="+1">🇺🇸 +1 USA</option><option value="+44">🇬🇧 +44 UK</option><option value="+971">🇦🇪 +971 Dubai</option><option value="+966">🇸🇦 +966 Saudi</option><option value="+92">🇵🇰 +92 Pakistan</option><option value="+880">🇧🇩 +880 Bangladesh</option></select><input id="mobileNum" type="tel" value="7906641577"></div>
-
-<div class="face-box">
-<div id="faceBefore"><div class="big" id="faceEmoji">👤</div><div class="status" id="faceStatus">Face Scan Nahi Hua</div><p style="font-size:12px;color:#aaa;margin-top:6px">Scan Dabao - Camera Khulega!</p></div>
-<div id="faceAfter" class="hidden"><img id="facePhoto" style="width:100px;height:100px;border-radius:50%;object-fit:cover;border:3px solid #2ecc71"><div class="status">Face Matched ✅</div></div>
+<div class="card" id="lockCard">
+<h3>🔐 QTrust Wallet - FINAL</h3>
+<p class="mut">ECDSA ✅ REAL | Falcon WASM ✅ REAL Try | Testnet ✅ REAL | GitHub Pe Hi Chalega - Koi Server Nahi!</p>
+<input id="pwd" type="password" placeholder="Password Daalo - Yaad Rakhna!">
+<div class="row"><button class="btn btn-y" onclick="createWallet()">✨ Naya Wallet Banao</button><button class="btn btn-d" onclick="showImport()">📥 Import Karo</button></div>
+<div id="importBox" style="display:none"><input id="impMnemonic" placeholder="12 Word Paste Karo..."><button class="btn btn-b" onclick="importWallet()">Import Karo</button></div>
+<div id="mnemonicBox" class="mono" style="display:none"></div>
+<div id="lockMsg" class="mut"></div>
 </div>
 
-<div id="resultBox" class="hidden" style="text-align:left"><p style="font-size:13px;color:#2ecc71;font-weight:bold">✨ WALLET BAN GAYA!</p><div class="pqid-box" id="previewPQID">PQID@...</div><div class="addr-box" id="previewBTC">BTC: ...</div><div class="addr-box" id="previewETH">ETH: ...</div><div class="addr-box" id="previewFalcon" style="color:#2ecc71">FALCON512: ...</div></div>
+<div class="card" id="mainCard" style="display:none">
+<div style="display:flex;justify-content:space-between"><b id="walletName">My Wallet</b><button onclick="lockWallet()" style="background:#222;color:#fff;border:0;padding:6px 12px;border-radius:8px">🔒 Lock</button></div>
+<div class="addr" id="myAddr">-</div>
+<div class="big" id="myBal">0.00 ETH</div>
+<div class="mut" id="myBalUsd">≈ $0 | Sepolia Testnet</div>
+<div class="grid"><div class="box"><b>BTC</b><div id="btcPrice">Loading...</div></div><div class="box"><b>ETH</b><div id="ethPrice">Loading...</div></div></div>
+<button class="btn btn-d" onclick="fetchRealBalance()">🔄 Balance Refresh Karo</button>
 
-<input type="file" id="cameraInput" accept="image/*" capture="user" style="display:none" onchange="onCameraPhoto(this)">
-<label for="cameraInput" id="scanBtn" class="login-btn">📸 Face Scan Karo - Camera Khulega</label>
+<h3>🚀 SEND - Testnet - FREE</h3>
+<input id="toAddr" placeholder="To Address - 0x...">
+<input id="sendAmt" placeholder="Amount - 0.01">
+<button class="btn btn-g" onclick="sendTestnetETH()">🚀 TESTNET Pe Bhejo - FREE</button>
+<div id="sendResult" class="mut"></div>
 
-<button class="btn login-btn green" id="loginBtn" onclick="doLogin()" disabled>🔓 Login Karke Wallet Kholo</button><p id="loginMsg" style="margin-top:10px;font-size:13px;color:#2ecc71"></p>
-</div>
-<div class="card" style="text-align:left"><p style="font-size:13px;color:#aaa">Backend URL</p><input id="backendUrl" value="http://localhost:3000"></div>
-</div>
+<h3>🛡️ Quantum Audit</h3>
+<button class="btn btn-y" onclick="testHybrid()">🧪 Falcon Test Karo - Sign + Verify</button>
+<div id="audit" class="mono">Abhi Koi Audit Nahi Hai - SEND Ya Test Dabao!</div>
 
-<div id="mainPage" class="hidden">
-<div class="top"><h2>🏦 QTRUST</h2><div class="pill" id="topPqid">PQID@... ✅</div></div>
-<div class="balance-card"><div style="font-size:13px;color:#ccc">Total Balance - REAL</div><div class="amt" id="totalBal">$ 0.00</div><div style="font-size:12px;color:#7ed6a0" id="walletMobile">Mobile: ...</div><button class="btn" style="background:#222;color:#fff;margin-top:10px;padding:10px;font-size:13px" onclick="fetchRealBalance()">🔍 REAL Balance Check Karo</button><p id="realBalMsg" style="font-size:12px;color:#aaa;margin-top:6px"></p></div>
-<div class="chart-card">
-<div class="price-row"><div><b id="chartCoinName">₿ Bitcoin</b> <span style="font-size:11px;color:#aaa" id="chartPair">BTC / USD</span></div><div style="text-align:right"><div class="price-big" id="chartPrice">Loading...</div><div id="chartChange" class="green" style="font-size:13px;font-weight:bold">Loading...</div></div></div>
-<div style="font-size:12px;color:#aaa"><span class="live-dot"></span> <span id="chartSource">REAL - CoinGecko</span></div>
-<div class="chart-tabs"><button type="button" class="chart-tab active" id="cTabBTC" onclick="switchChartCoin('BTC')">₿ BTC</button><button type="button" class="chart-tab" id="cTabETH" onclick="switchChartCoin('ETH')">◆ ETH</button></div>
-<canvas id="priceChart" height="180"></canvas>
-<div class="time-tabs"><button type="button" class="time-tab" onclick="setTimeRange('1',this)">1H</button><button type="button" class="time-tab active" onclick="setTimeRange('1',this)">24H</button><button type="button" class="time-tab" onclick="setTimeRange('7',this)">7D</button><button type="button" class="time-tab" onclick="setTimeRange('30',this)">30D</button></div>
-<div style="display:flex;gap:8px;margin-top:12px;font-size:12px"><div style="flex:1;background:#222;padding:10px;border-radius:10px;text-align:center">24h High<br><b id="highPrice" style="color:#2ecc71">Loading...</b></div><div style="flex:1;background:#222;padding:10px;border-radius:10px;text-align:center">24h Low<br><b id="lowPrice" style="color:#ff4757">Loading...</b></div><div style="flex:1;background:#222;padding:10px;border-radius:10px;text-align:center">24h Volume<br><b id="volPrice">Loading...</b></div></div>
+<h3>📋 Backup</h3>
+<button class="btn btn-d" onclick="showMnemonic()">👁️ 12 Word Dikhao</button>
+<div id="backupBox" class="mono" style="display:none"></div>
+<p class="mut">⚠️ Ye Demo + Testnet Wallet Hai! Real Paisa Mat Dalna! 12 Word Kisi Ko Mat Dena!</p>
 </div>
-<div class="tabs"><button type="button" class="tab active" id="tabAll" onclick="showTab('all')">All</button><button type="button" class="tab" id="tabBTC" onclick="showTab('btc')">BTC</button><button type="button" class="tab" id="tabETH" onclick="showTab('eth')">ETH</button></div>
-<div class="coin active" id="coinBTC" onclick="selectCoin('BTC')"><div><b>₿ Bitcoin - REAL</b><br><span id="btcAddrShort">BTC • ...</span><br><span id="btcLivePrice" style="color:#f5d67b;font-size:13px;font-weight:bold">Loading...</span></div><div style="text-align:right"><b id="btcBalText">0.00 BTC</b><br><span class="green" id="btcUsd">$0.00</span></div></div>
-<div class="coin" id="coinETH" onclick="selectCoin('ETH')"><div><b>◆ Ethereum - REAL</b><br><span id="ethAddrShort">ETH • ...</span><br><span id="ethLivePrice" style="color:#f5d67b;font-size:13px;font-weight:bold">Loading...</span></div><div style="text-align:right"><b id="ethBalText">0.00 ETH</b><br><span class="green" id="ethUsd">$0.00</span></div></div>
-<div class="btn-row"><button class="btn btn-send" onclick="openSend()">↗ SEND</button><button class="btn btn-recv" onclick="openRecv()">↙ RECEIVE</button></div>
-<div class="card hidden" id="sendBox"><h3 id="sendTitle">Send BTC ↗</h3><p style="font-size:12px;color:#aaa;word-break:break-all">From: <span id="fromAddr">...</span></p><input id="toAddr" placeholder="To Address"><input id="sendAmt" type="number" placeholder="Amount"><p class="fee" id="feeText">Gas Fee: Real Network Fee</p><button class="btn btn-send" style="width:100%;margin-top:8px" onclick="confirmSendReal()">🔏 Sign + Verify + Bhejo 🚀</button><div id="sigPreview" class="hidden"><div class="sig-box" id="sigText">Signature: ...</div><div id="sigVerifyBox"></div></div><p id="sendResult" style="font-size:12px;color:#2ecc71;margin-top:8px"></p></div>
-<div class="card hidden" id="recvBox"><h3 id="recvTitle">Receive BTC ↙</h3><div class="qr" id="qrBox">...</div><button class="btn btn-recv" style="width:100%;margin-top:10px" onclick="copyRecv()">📋 Copy REAL Address</button></div>
-<div class="card"><h3>📜 History</h3><div class="hist" id="history">Abhi Koi Transaction Nahi...</div></div>
-<div class="card"><h3>🔏 Signature + FALCON512 Audit</h3><div id="auditVerifyBox" class="audit-ok">⏳ SEND Karo To Yaha Aayega!</div><div class="audit-box"><div class="hist" id="audit">Koi Audit Nahi...</div></div><button class="btn" style="background:#222;color:#fff;width:100%;margin-top:10px" onclick="verifyLastSignature()">🔍 Last Signature Dobara Verify Karo</button><button class="btn" style="background:#222;color:#fff;width:100%;margin-top:8px" onclick="copyAudit()">📋 Audit Copy Karo</button></div>
-</div>
-
-<div id="settingsPage" class="hidden">
-<div class="top"><h2>⚙️ Settings</h2><div class="pill">QTrust REAL + FALCON512</div></div>
-<div class="card"><h3>👤 My Identity</h3><div class="pqid-box" id="settingPQID">PQID@...</div><p style="font-size:12px;color:#aaa;margin-top:8px" id="settingMobile">Mobile: ...</p><div class="addr-box" id="settingFalcon" style="color:#2ecc71">FALCON512: ...</div></div>
-<div class="card"><h3>💰 My REAL Addresses</h3><div class="addr-box" id="settingBTC">BTC: ...</div><div class="addr-box" id="settingETH">ETH: ...</div><button class="btn btn-recv" style="width:100%;margin-top:10px" onclick="copyAllAddr()">📋 Copy Addresses</button></div>
-<div class="card"><button class="btn" style="width:100%;background:#ff4757;color:#fff" onclick="logout()">Logout 🔒</button></div>
-</div>
-
-<div class="bottom"><div id="navWallet" class="active" onclick="goPage('wallet')">🏠 Wallet</div><div id="navSend" onclick="goPage('send')">↗ Send</div><div id="navRecv" onclick="goPage('receive')">↙ Receive</div><div id="navSet" onclick="goPage('settings')">⚙️ Settings</div></div>
 
 <script>
-let prices={BTC:0,ETH:0},priceChange={BTC:0,ETH:0},chartCoin='BTC',timeRangeDays='1',myChart=null,balances={BTC:0,ETH:0},selected='BTC',currentPQID="",currentMobile="",addrs={BTC:"",ETH:""},fees={BTC:0.0005,ETH:0.001},faceScanned=false,backendUrl="http://localhost:3000",lastSignature=null,lastSignedMessage="",lastAuditText="",lastFalconSig="",lastHybrid=null,facePhotoData="";
-async function sha256Hex(s){const b=await crypto.subtle.digest('SHA-256',new TextEncoder().encode(s));return Array.from(new Uint8Array(b)).map(x=>x.toString(16).padStart(2,'0')).join('');}
-async function sha512Hex(s){const b=await crypto.subtle.digest('SHA-512',new TextEncoder().encode(s));return Array.from(new Uint8Array(b)).map(x=>x.toString(16).padStart(2,'0')).join('');}
-async function shake256Like(input,len=64){let o="",c=0;while(o.length<len*2){o+=await sha512Hex(input+"|SHAKE256|"+c);c++;}return o.slice(0,len*2);}
-function ripemd160(inputBytes){
-function rol(x,n){return ((x<<n)|(x>>>(32-n)))>>>0;}
-function f1(x,y,z){return x^y^z;}function f2(x,y,z){return (x&y)|(~x&z);}function f3(x,y,z){return (x|~y)^z;}function f4(x,y,z){return (x&z)|(y&~z);}function f5(x,y,z){return x^(y|~z);}
-const R1=[0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,7,4,13,1,10,6,15,3,12,0,9,5,2,14,11,8,3,10,14,4,9,15,8,1,2,7,0,6,13,11,5,12,1,9,11,10,0,8,12,4,13,3,7,15,14,5,6,2,4,0,5,9,7,12,2,10,14,1,3,8,11,6,15,13];
-const R2=[5,14,7,0,9,2,11,4,13,6,15,8,1,10,3,12,6,11,3,7,0,13,5,10,14,15,8,12,4,9,1,2,15,5,1,3,7,14,6,9,11,8,12,2,10,0,4,13,8,6,4,1,3,11,15,0,5,12,2,13,9,7,10,14,12,15,10,4,1,5,8,7,6,2,13,11,5,14,15,5,6,2,3,12,14,15,10,4,1,8];
-const S1=[11,14,15,12,5,8,7,9,11,13,14,15,6,7,9,8,7,6,8,13,11,9,7,15,7,12,15,9,11,7,13,12,11,13,6,7,14,9,13,15,14,8,13,6,5,12,7,5,11,12,14,15,14,15,9,8,9,14,5,6,8,6,5,12,9,15,5,11,6,8,13,12,5,12,13,14,11,8,5,6];
-const S2=[8,9,9,11,13,15,15,5,7,7,8,11,14,14,12,6,9,13,15,7,12,8,9,11,7,7,12,7,6,15,13,11,9,7,15,11,8,6,6,14,12,13,5,14,13,13,7,5,15,5,8,11,14,14,6,14,6,9,12,9,12,5,15,8,8,5,12,9,7,5,15,14,11,8,8,6,14,12,11,9,9,5];
-const K1=[0x00000000,0x5a827999,0x6ed9eba1,0x8f1bbcdc,0xa953fd4e];const K2=[0x50a28be6,0x5c4dd124,0x6d703ef3,0x7a6d76e9,0x00000000];
-let msg=Array.from(inputBytes);let ml=msg.length;msg.push(0x80);while((msg.length%64)!==56)msg.push(0);let bl=ml*8;for(let i=0;i<8;i++)msg.push((bl>>>(i*8))&0xff);
-let h0=0x67452301,h1=0xefcdab89,h2=0x98badcfe,h3=0x10325476,h4=0xc3d2e1f0;
-for(let off=0;off<msg.length;off+=64){let X=[];for(let i=0;i<16;i++)X.push(msg[off+i*4]|(msg[off+i*4+1]<<8)|(msg[off+i*4+2]<<16)|(msg[off+i*4+3]<<24));
-let al=h0,bl2=h1,cl=h2,dl=h3,el=h4,ar=h0,br=h1,cr=h2,dr=h3,er=h4;
-for(let j=0;j<80;j++){let r=Math.floor(j/16);let t1=(rol((al+[f1,f2,f3,f4,f5][r](bl2,cl,dl)+X[R1[j]]+K1[r])>>>0,S1[j])+el)>>>0;al=el;el=dl;dl=rol(cl,10);cl=bl2;bl2=t1;let t2=(rol((ar+[f5,f4,f3,f2,f1][r](br,cr,dr)+X[R2[j]]+K2[r])>>>0,S2[j])+er)>>>0;ar=er;er=dr;dr=rol(cr,10);cr=br;br=t2;}
-let t=(h1+cl+dr)>>>0;h1=(h2+dl+er)>>>0;h2=(h3+el+ar)>>>0;h3=(h4+al+br)>>>0;h4=(h0+bl2+cr)>>>0;h0=t;}
-let out=new Uint8Array(20);[h0,h1,h2,h3,h4].forEach((h,i)=>{out[i*4]=h&0xff;out[i*4+1]=(h>>8)&0xff;out[i*4+2]=(h>>16)&0xff;out[i*4+3]=(h>>24)&0xff;});return out;}
-function bech32Encode(hrp,witVer,witProg){
-const CHARSET='qpzry9x8gf2tvdw0s3jn54khce6mua7l';
-function convertbits(d,from,to,pad){let acc=0,bits=0,ret=[],maxv=(1<<to)-1;for(let v of d){acc=(acc<<from)|v;bits+=from;while(bits>=to){bits-=to;ret.push((acc>>bits)&maxv);}}if(pad&&bits)ret.push((acc<<(to-bits))&maxv);return ret;}
-function polymod(vals){const GEN=[0x3b6a57b2,0x26508e6d,0x1ea119fa,0x3d4233dd,0x2a1462b3];let chk=1;for(let v of vals){let b=chk>>25;chk=((chk&0x1ffffff)<<5)^v;for(let i=0;i<5;i++)if((b>>i)&1)chk^=GEN[i];}return chk;}
-function hrpExpand(hrp){let r=[];for(let c of hrp)r.push(c.charCodeAt(0)>>5);r.push(0);for(let c of hrp)r.push(c.charCodeAt(0)&31);return r;}
-let data=[witVer].concat(convertbits(witProg,8,5,true));let vals=hrpExpand(hrp).concat(data).concat([0,0,0,0,0,0]);let pm=polymod(vals)^1;let cs=[];for(let i=0;i<6;i++)cs.push((pm>>5*(5-i))&31);return hrp+'1'+data.concat(cs).map(d=>CHARSET[d]).join('');}
-async function makeFalcon512Keypair(mobile){let seed=await sha512Hex("FALCON512_QTRUST_"+mobile+"_QUANTUM_SAFE_2026");let priv=await shake256Like(seed+"_FALCON_PRIVATE",128);let pub=await shake256Like(priv+"_FALCON_PUBLIC",64);return{falconPrivate:priv,falconPublic:pub,falconPQID:"FALCON512@"+pub.slice(0,8).toUpperCase()};}
-async function falcon512Sign(msg,mobile){let kp=await makeFalcon512Keypair(mobile);let nonce=await shake256Like(msg+kp.falconPrivate+Date.now(),32);let sig=await shake256Like(nonce+msg+kp.falconPrivate+"_FALCON512_SIGN",128);return{signature:"FALCON512:"+nonce+":"+sig,publicKey:kp.falconPublic,pqid:kp.falconPQID};}
-async function falcon512Verify(msg,falconSig,mobile){try{let kp=await makeFalcon512Keypair(mobile);let p=falconSig.split(":");if(p[0]!=="FALCON512")return{isValid:false,reason:"No FALCON512"};let exp=await shake256Like(p[1]+msg+kp.falconPrivate+"_FALCON512_SIGN",128);return{isValid:exp===p[2],reason:exp===p[2]?"FALCON512 Match ✅":"Mismatch ❌",publicKey:kp.falconPublic};}catch(e){return{isValid:false,reason:e.message}}}
-async function verifySignature(msg,sig,exp){try{let rec=ethers.utils.verifyMessage(msg,sig);return{isValid:rec.toLowerCase()===exp.toLowerCase(),recovered:rec};}catch(e){return{isValid:false,recovered:e.message}}}
-async function hybridSign(msg,mobile){let pk=await sha256Hex("QTRUST_FACE_"+mobile+"_QUANTUM_SAFE_2026");let w;try{w=new ethers.Wallet("0x"+pk);}catch(e){w={address:"0x"+(await sha256Hex(pk+"_ETH")).slice(0,40),signMessage:async()=>{return "0x"+await sha256Hex(msg+pk);}}}let ecdsa=await w.signMessage(msg);let f=await falcon512Sign(msg,mobile);return{ecdsaSig:ecdsa,ecdsaSigner:w.address,falconSig:f.signature,falconPublic:f.publicKey,falconPQID:f.pqid,message:msg};}
-async function hybridVerify(msg,hyb,mobile){let e=await verifySignature(msg,hyb.ecdsaSig,hyb.ecdsaSigner);let f=await falcon512Verify(msg,hyb.falconSig,mobile);return{ecdsa:e,falcon:f,bothPass:e.isValid&&f.isValid};}
-async function verifyLastSignature(){if(!lastHybrid){alert("Pehle SEND Karo!");return;}let v=await hybridVerify(lastSignedMessage,lastHybrid,currentMobile);if(v.bothPass){document.getElementById('auditVerifyBox').className="audit-ok";document.getElementById('auditVerifyBox').innerHTML="✅ Hybrid Verify Ho Gaya!<br>ECDSA: ✅ "+v.ecdsa.recovered+"<br>FALCON512: ✅ "+v.falcon.reason;alert("✅ Dono VALID Hai!");}else{document.getElementById('auditVerifyBox').className="audit-fail";document.getElementById('auditVerifyBox').innerHTML="❌ FAIL!";alert("❌ FAIL!");}}
-function copyAudit(){navigator.clipboard.writeText(lastAuditText||document.getElementById('audit').innerText);alert("Audit Copy Ho Gaya! ✅");}
-async function fetchRealChart(){let coinId=chartCoin=='BTC'?'bitcoin':'ethereum';document.getElementById('chartSource').innerText="REAL - CoinGecko Se...";try{let res=await fetch(`https://api.coingecko.com/api/v3/coins/${coinId}/market_chart?vs_currency=usd&days=${timeRangeDays}`);let d=await res.json();if(!d.prices)throw new Error("CoinGecko Limit - 1 Min Ruko!");let labels=d.prices.map(p=>{let dt=new Date(p[0]);if(timeRangeDays=='1')return dt.getHours()+":"+String(dt.getMinutes()).padStart(2,'0');return dt.getDate()+"/"+(dt.getMonth()+1);});let data=d.prices.map(p=>p[1]);prices[chartCoin]=data[data.length-1];drawRealChart(labels,data);document.getElementById('chartSource').innerText="✅ REAL - CoinGecko - "+d.prices.length+" Points!";updatePriceUI();}catch(e){document.getElementById('chartSource').innerText="⚠️ "+e.message;}}
-function drawRealChart(labels,data){let ctx=document.getElementById('priceChart').getContext('2d');if(myChart)myChart.destroy();let up=data[data.length-1]>=data[0];myChart=new Chart(ctx,{type:'line',data:{labels,[STRIPPED] $"+Number(c.raw).toLocaleString()}}},scales:{x:{grid:{color:'#222'},ticks:{color:'#888',maxTicksLimit:6}},y:{grid:{color:'#222'},ticks:{color:'#aaa',callback:v=>"$"+Math.round(v).toLocaleString()}}}}});}
-async function fetchLivePrice(){try{let res=await fetch("https://api.coingecko.com/api/v3/simple/price?ids=bitcoin,ethereum&vs_currencies=usd&include_24hr_change=true&include_24hr_high=true&include_24hr_low=true&include_24hr_vol=true");let d=await res.json();if(d.bitcoin){prices.BTC=d.bitcoin.usd;priceChange.BTC=d.bitcoin.usd_24h_change;document.getElementById('highPrice').innerText="$"+Math.round(d.bitcoin.usd_24h_high).toLocaleString();document.getElementById('lowPrice').innerText="$"+Math.round(d.bitcoin.usd_24h_low).toLocaleString();document.getElementById('volPrice').innerText="$"+(d.bitcoin.usd_24h_vol/1e9).toFixed(1)+"B";}if(d.ethereum){prices.ETH=d.ethereum.usd;priceChange.ETH=d.ethereum.usd_24h_change;}updatePriceUI();}catch(e){}}
-function updatePriceUI(){if(prices.BTC>0){document.getElementById('btcLivePrice').innerText="$"+prices.BTC.toLocaleString()+" • "+(priceChange.BTC>=0?"▲ +":"▼ ")+priceChange.BTC.toFixed(2)+"%";document.getElementById('ethLivePrice').innerText="$"+prices.ETH.toLocaleString()+" • "+(priceChange.ETH>=0?"▲ +":"▼ ")+priceChange.ETH.toFixed(2)+"%";document.getElementById('chartPrice').innerText="$"+prices[chartCoin].toLocaleString();document.getElementById('chartChange').innerText=(priceChange[chartCoin]>=0?"▲ +":"▼ ")+priceChange[chartCoin].toFixed(2)+"% (24h)";document.getElementById('chartChange').className=priceChange[chartCoin]>=0?"green":"red";}updateUI();}
-function switchChartCoin(c){chartCoin=c;document.getElementById('cTabBTC').className='chart-tab'+(c=='BTC'?' active':'');document.getElementById('cTabETH').className='chart-tab'+(c=='ETH'?' active':'');document.getElementById('chartCoinName').innerText=c=='BTC'?'₿ Bitcoin':'◆ Ethereum';document.getElementById('chartPair').innerText=c+' / USD';fetchRealChart();}
-function setTimeRange(days,el){timeRangeDays=days;document.querySelectorAll('.time-tab').forEach(e=>e.className='time-tab');el.className='time-tab active';fetchRealChart();}
-function showTab(t){document.getElementById('tabAll').className='tab'+(t=='all'?' active':'');document.getElementById('tabBTC').className='tab'+(t=='btc'?' active':'');document.getElementById('tabETH').className='tab'+(t=='eth'?' active':'');if(t=='btc'){selectCoin('BTC');switchChartCoin('BTC');document.getElementById('coinETH').style.display='none';document.getElementById('coinBTC').style.display='flex';}else if(t=='eth'){selectCoin('ETH');switchChartCoin('ETH');document.getElementById('coinBTC').style.display='none';document.getElementById('coinETH').style.display='flex';}else{document.getElementById('coinBTC').style.display='flex';document.getElementById('coinETH').style.display='flex';}}
-function goPage(p){document.getElementById('navWallet').className='';document.getElementById('navSend').className='';document.getElementById('navRecv').className='';document.getElementById('navSet').className='';if(p=='wallet'){document.getElementById('mainPage').classList.remove('hidden');document.getElementById('settingsPage').classList.add('hidden');document.getElementById('navWallet').className='active';window.scrollTo(0,0);}if(p=='send'){document.getElementById('mainPage').classList.remove('hidden');document.getElementById('settingsPage').classList.add('hidden');document.getElementById('navSend').className='active';openSend();}if(p=='receive'){document.getElementById('mainPage').classList.remove('hidden');document.getElementById('settingsPage').classList.add('hidden');document.getElementById('navRecv').className='active';openRecv();}if(p=='settings'){document.getElementById('mainPage').classList.add('hidden');document.getElementById('settingsPage').classList.remove('hidden');document.getElementById('navSet').className='active';window.scrollTo(0,0);}}
-async function fetchRealBalance(){if(!addrs.BTC||!addrs.ETH){document.getElementById('realBalMsg').innerText="Pehle Face Scan Karo!";return;}document.getElementById('realBalMsg').innerText="Blockchain Se REAL Balance...";try{let br=await fetch("https://mempool.space/api/address/"+addrs.BTC);let bd=await br.json();balances.BTC=(bd.chain_stats.funded_txo_sum-bd.chain_stats.spent_txo_sum)/1e8;let er=await fetch("https://eth.llamarpc.com",{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({jsonrpc:"2.0",id:1,method:"eth_getBalance",params:[addrs.ETH,"latest"]})});let ed=await er.json();balances.ETH=parseInt(ed.result,16)/1e18;updateUI();document.getElementById('realBalMsg').innerText="✅ REAL: BTC "+balances.BTC+" | ETH "+balances.ETH;}catch(e){document.getElementById('realBalMsg').innerText="⚠️ Fail: "+e.message;}}
-async function confirmSendReal(){
-let to=document.getElementById('toAddr').value.trim();let amt=parseFloat(document.getElementById('sendAmt').value);
-if(!to){alert("To Address Daalo!");return;}if(!amt||amt<=0){alert("Amount Daalo!");return;}
-backendUrl=document.getElementById('backendUrl').value.trim()||"http://localhost:3000";let st=performance.now();
-if(!confirm("Face ID?\nOK = Face Matched ✅\n\n"+amt+" "+selected+" -> "+to))return;
-let msg=`QTRUST SEND\nFrom: ${addrs[selected]}\nTo: ${to}\nAmount: ${amt} ${selected}\nPQID: ${currentPQID}\nMobile: ${currentMobile}\nTime: ${new Date().toISOString()}`;
-document.getElementById('sigPreview').classList.remove('hidden');document.getElementById('sigText').innerText="🔏 ECDSA + FALCON512 Signing... Ruko...";
-let hyb=await hybridSign(msg,currentMobile);lastSignature=hyb.ecdsaSig;lastSignedMessage=msg;lastFalconSig=hyb.falconSig;lastHybrid=hyb;
-document.getElementById('sigText').innerText="ECDSA:\n"+hyb.ecdsaSig+"\n\nFALCON512:\n"+hyb.falconSig.slice(0,120)+"...\n\nFALCON Public: "+hyb.falconPublic.slice(0,32)+"...";
-let v=await hybridVerify(msg,hyb,currentMobile);
-if(!v.bothPass){document.getElementById('sigVerifyBox').innerHTML="<div class='audit-fail'>❌ FAIL! ECDSA: "+v.ecdsa.isValid+" FALCON: "+v.falcon.isValid+"<br>Send BLOCKED!</div>";alert("❌ Signature FAIL!");return;}
-document.getElementById('sigVerifyBox').innerHTML="<div class='audit-ok'>✅ HYBRID VERIFIED!<br>ECDSA: ✅ "+v.ecdsa.recovered+"<br>FALCON512: ✅ "+v.falcon.reason+"</div>";
-document.getElementById('auditVerifyBox').className="audit-ok";document.getElementById('auditVerifyBox').innerHTML="✅ Hybrid Verified!<br>ECDSA ✅ + FALCON512 ✅<br>"+new Date().toLocaleString();
-document.getElementById('sendResult').innerText="Signature Pass ✅ - REAL Send Ho Raha Hai...";
-let txHash="",explorer="";
-try{let url=selected=='ETH'?backendUrl+'/send-eth':backendUrl+'/send-btc';let res=await fetch(url,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({mobile:currentMobile,to,amount:amt,signature:hyb.ecdsaSig,falconSignature:hyb.falconSig,falconPublic:hyb.falconPublic,message:msg})});let data=await res.json();if(data.success){txHash=data.hash||data.txid;explorer=data.explorer;document.getElementById('sendResult').innerHTML="✅ REAL SEND HO GAYA!<br>Tx: "+txHash;}else{txHash="FAILED: "+data.error;document.getElementById('sendResult').innerText="⚠️ Backend Fail: "+data.error;}}catch(e){txHash="BACKEND NOT RUNNING";document.getElementById('sendResult').innerText="⚠️ Backend Nahi Chala - Signature Pass Tha!";}
-let tt=Math.round(performance.now()-st);
-lastAuditText=`=== QTRUST FALCON512 AUDIT ===\nStatus: ✅ PASS - QUANTUM SAFE\nTime: ${new Date().toLocaleString()}\nMobile: ${currentMobile}\nPQID: ${currentPQID}\nFALCON PQID: ${hyb.falconPQID}\nFace: ✅ MATCHED - Camera Photo\nTX: SEND ${amt} ${selected}\nFrom: ${addrs[selected]}\nTo: ${to}\nPrice: $${prices[selected]}\nECDSA: ${hyb.ecdsaSig}\nSigner: ${v.ecdsa.recovered} ✅ VALID\nFALCON512: ${hyb.falconSig.slice(0,200)}...\nPublic: ${hyb.falconPublic}\nVerify: ✅ VALID\nHybrid: ✅ PASS\nTx: ${txHash}\nExplorer: ${explorer}\nTime: ${tt}ms\nQTrust v5.0 Final V5`;
-document.getElementById('audit').innerText=lastAuditText;
-document.getElementById('history').innerHTML="✅ SENT "+amt+" "+selected+" -> "+to+"<br>ECDSA ✅ + FALCON512 ✅<br>Tx: "+txHash+"<br><br>"+document.getElementById('history').innerHTML;
-alert("✅ HO GAYA!\nECDSA + FALCON512 PASS ✅\nTx: "+txHash);
-document.getElementById('toAddr').value="";document.getElementById('sendAmt').value="";fetchRealBalance();
-}
-// WALLET BANANE WALA - BINA LIBRARY KE BHI BANEGA!
-async function makeRealIdentity(fullMobile){
-  let seedText="QTRUST_FACE_"+fullMobile+"_QUANTUM_SAFE_2026";
-  let privateKeyHex=await sha256Hex(seedText);
-  let ethAddr="0x";
+let currentWallet=null, currentMnemonic="", currentPassword="";
+let falconWasm=null, falconWasmKeypair=null, falconWasmReady=false;
+
+// ===== FALCON WASM LOAD =====
+async function initFalconWasm(){
   try{
-    if(typeof ethers!=="undefined"){
-      let w=new ethers.Wallet("0x"+privateKeyHex); ethAddr=w.address;
-    } else { throw new Error("ethers nahi"); }
-  }catch(e){
-    let h=await sha256Hex(privateKeyHex+"_ETH"); ethAddr="0x"+h.slice(0,40);
-  }
-  let btcAddr="";
-  try{
-    if(typeof ethers!=="undefined"){
-      let pubKey=ethers.utils.computePublicKey("0x"+privateKeyHex,true);
-      let pubBytes=ethers.utils.arrayify(pubKey);
-      let shaBuf=await crypto.subtle.digest('SHA-256',pubBytes);
-      let hash160=ripemd160(new Uint8Array(shaBuf));
-      btcAddr=bech32Encode('bc',0,hash160);
-    } else { throw new Error("ethers nahi"); }
-  }catch(e){
-    let h1=await sha256Hex(privateKeyHex+"_BTC");
-    let h2=await sha256Hex(h1+"_BTC2");
-    let chars="qpzry9x8gf2tvdw0s3jn54khce6mua7l";
-    let out="bc1q";
-    for(let i=0;i<38;i++){ out+=chars[parseInt(h2.slice(i*2,i*2+2),16)%chars.length]; }
-    btcAddr=out;
-  }
-  let last4=fullMobile.replace(/[^0-9]/g,"").slice(-4);
-  let pqid="PQID@"+last4+"_"+privateKeyHex.slice(0,3).toUpperCase();
-  return{pqid,btcAddr,ethAddr,mobile:fullMobile};
-}
-async function getOrCreateIdentity(fullMobile){
-  let clean=fullMobile.replace(/[^0-9+]/g,"");
-  let key="QTRUST_REAL_V2_"+clean;
-  let saved=localStorage.getItem(key);
-  if(saved){
-    try{
-      let d=JSON.parse(saved);
-      if(d.btcAddr && d.btcAddr.length>30 && d.btcAddr.startsWith("bc1q")){ return{data:d,[STRIPPED]
-    }catch(e){}
-    localStorage.removeItem(key);
-  }
-  let data=await makeRealIdentity(fullMobile);
-  localStorage.setItem(key,JSON.stringify(data));
-  return{data,isOld:false};
-}
-// CAMERA - LABEL WALA - Photo Aate Hi Wallet Banega!
-async function onCameraPhoto(input){
-  if(!input.files || !input.files[0]){ return; }
-  let num=document.getElementById('mobileNum').value.trim().replace(/[^0-9]/g,"");
-  if(!num || num.length<7){ alert("Pehle Sahi Mobile Daalo! 10 Digit!"); input.value=""; return; }
-  let file=input.files[0];
-  let reader=new FileReader();
-  reader.onload=async function(e){
-    try{
-      facePhotoData=e.target.result;
-      document.getElementById('faceBefore').classList.add('hidden');
-      document.getElementById('faceAfter').classList.remove('hidden');
-      document.getElementById('facePhoto').src=facePhotoData;
-      document.getElementById('scanBtn').innerText="Wallet Bana Raha Hu... Ruko...";
-      let code=document.getElementById('countryCode').value;
-      let fullMobile=code+" "+num;
-      let result=await getOrCreateIdentity(fullMobile);
-      let d=result.data;
-      currentPQID=d.pqid; currentMobile=d.mobile; addrs.BTC=d.btcAddr; addrs.ETH=d.ethAddr;
-      let falcon=await makeFalcon512Keypair(fullMobile);
-      document.getElementById('previewPQID').innerText=d.pqid;
-      document.getElementById('previewBTC').innerText="BTC REAL: "+d.btcAddr;
-      document.getElementById('previewETH').innerText="ETH REAL: "+d.ethAddr;
-      document.getElementById('previewFalcon').innerText="FALCON512: "+falcon.falconPQID+" | "+falcon.falconPublic.slice(0,32)+"...";
-      document.getElementById('resultBox').classList.remove('hidden');
-      document.getElementById('btcAddrShort').innerText="BTC • "+d.btcAddr.slice(0,10)+"..."+d.btcAddr.slice(-6);
-      document.getElementById('ethAddrShort').innerText="ETH • "+d.ethAddr.slice(0,8)+"..."+d.ethAddr.slice(-6);
-      document.getElementById('settingPQID').innerText=d.pqid;
-      document.getElementById('settingMobile').innerText="Mobile: "+d.mobile;
-      document.getElementById('settingFalcon').innerText="FALCON512: "+falcon.falconPQID+" | "+falcon.falconPublic;
-      document.getElementById('settingBTC').innerText="BTC REAL: "+d.btcAddr;
-      document.getElementById('settingETH').innerText="ETH REAL: "+d.ethAddr;
-      document.getElementById('walletMobile').innerText="Mobile: "+d.mobile+" • REAL + FALCON512 ✅";
-      document.getElementById('faceEmoji').innerText="✅";
-      document.getElementById('faceStatus').innerText="Face Matched ✅";
-      document.getElementById('loginMsg').innerText="Ho Gaya! PQID: "+d.pqid;
-      document.getElementById('loginBtn').disabled=false;
-      document.getElementById('scanBtn').innerText="📸 Dobara Face Scan - Camera Khulega";
-      faceScanned=true; updateUI();
-      alert("✅ WALLET BAN GAYA!\n\nPQID: "+d.pqid+"\nBTC: "+d.btcAddr+"\nETH: "+d.ethAddr+"\n\nAb LOGIN Dabao!");
-    }catch(err){
-      alert("❌ WALLET FAIL!\nError: "+err.message);
-      document.getElementById('scanBtn').innerText="📸 Dobara Try Karo";
+    if(window.LibOQS || window.liboqs){
+      let lib = window.LibOQS || window.liboqs;
+      if(lib.then) lib = await lib;
+      if(lib.init) await lib.init();
+      falconWasm=lib; falconWasmReady=true;
+      document.getElementById('falconStatus').innerText="FALCON: REAL WASM ✅";
+      document.getElementById('falconStatus').className="badge";
+      console.log("✅ FALCON WASM READY");
+      return true;
+    } else {
+      document.getElementById('falconStatus').innerText="FALCON: DEMO ⚠️";
+      return false;
     }
-  };
-  reader.readAsDataURL(file);
-  input.value="";
+  }catch(e){ console.log("WASM Fail:",e.message); document.getElementById('falconStatus').innerText="FALCON: DEMO ⚠️"; return false; }
 }
-function doLogin(){if(!faceScanned){alert("Pehle Face Scan Karo!");return;}document.getElementById('topPqid').innerText=currentPQID+" ✅";document.getElementById('loginPage').classList.add('hidden');document.getElementById('mainPage').classList.remove('hidden');selectCoin('BTC');fetchLivePrice();fetchRealChart();fetchRealBalance();window.scrollTo(0,0);}
-function logout(){if(confirm("Logout Karna Hai?")){document.getElementById('loginPage').classList.remove('hidden');document.getElementById('mainPage').classList.add('hidden');document.getElementById('settingsPage').classList.add('hidden');window.scrollTo(0,0);}}
-function updateUI(){document.getElementById('btcBalText').innerText=balances.BTC.toFixed(5)+" BTC";document.getElementById('ethBalText').innerText=balances.ETH.toFixed(3)+" ETH";document.getElementById('btcUsd').innerText="$"+(balances.BTC*prices.BTC).toFixed(2);document.getElementById('ethUsd').innerText="$"+(balances.ETH*prices.ETH).toFixed(2);document.getElementById('totalBal').innerText="$ "+(balances.BTC*prices.BTC+balances.ETH*prices.ETH).toFixed(2);}
-function selectCoin(c){selected=c;document.getElementById('sendTitle').innerText="Send "+c+" ↗";document.getElementById('recvTitle').innerText="Receive "+c+" ↙";document.getElementById('fromAddr').innerText=addrs[c];document.getElementById('qrBox').innerHTML=addrs[c]+"<br><br>⬛⬛⬛⬛<br>⬛ QR ⬛<br>⬛⬛⬛⬛";document.getElementById('feeText').innerText="Gas Fee: "+fees[c]+" "+c+" • 1 "+c+" = $"+prices[c].toLocaleString();document.getElementById('sendBox').classList.remove('hidden');document.getElementById('recvBox').classList.add('hidden');document.getElementById('coinBTC').className='coin'+(c=='BTC'?' active':'');document.getElementById('coinETH').className='coin'+(c=='ETH'?' active':'');}
-function openSend(){document.getElementById('mainPage').classList.remove('hidden');document.getElementById('settingsPage').classList.add('hidden');document.getElementById('sendBox').classList.remove('hidden');document.getElementById('recvBox').classList.add('hidden');setTimeout(()=>document.getElementById('sendBox').scrollIntoView({behavior:'smooth'}),100);}
-function openRecv(){document.getElementById('mainPage').classList.remove('hidden');document.getElementById('settingsPage').classList.add('hidden');document.getElementById('recvBox').classList.remove('hidden');document.getElementById('sendBox').classList.add('hidden');setTimeout(()=>document.getElementById('recvBox').scrollIntoView({behavior:'smooth'}),100);}
-function copyRecv(){navigator.clipboard.writeText(addrs[selected]);alert("Copy Ho Gaya: "+addrs[selected]);}
-function copyAllAddr(){navigator.clipboard.writeText("Mobile: "+currentMobile+"\nPQID: "+currentPQID+"\nBTC: "+addrs.BTC+"\nETH: "+addrs.ETH);alert("Copy Ho Gaya!");}
-document.getElementById('sendAmt').addEventListener('input',function(){let a=parseFloat(this.value)||0;document.getElementById('feeText').innerText="Gas Fee: "+fees[selected]+" "+selected+" • Total: "+(a+fees[selected]).toFixed(5)+" = $"+((a+fees[selected])*prices[selected]).toFixed(2);});
-fetchLivePrice();setInterval(fetchLivePrice,30000);updateUI();
+window.addEventListener('load',()=>{ setTimeout(initFalconWasm,500); fetchPrices(); });
+
+// ===== WALLET =====
+function showImport(){ document.getElementById('importBox').style.display='block'; }
+function createWallet(){
+  let p=document.getElementById('pwd').value.trim();
+  if(!p){ alert("Pehle Password Daalo!"); return; }
+  let w=ethers.Wallet.createRandom();
+  currentMnemonic=w.mnemonic.phrase; currentWallet=w; currentPassword=p;
+  document.getElementById('mnemonicBox').style.display='block';
+  document.getElementById('mnemonicBox').innerText="⚠️ YE 12 WORD LIKH LO - KAHI SAVE KAR LO!\n\n"+currentMnemonic+"\n\nIsko Kisi Ko Mat Dena!";
+  document.getElementById('lockMsg').innerText="✅ Wallet Ban Gaya! 12 Word Copy Kar Lo - Fir Neeche Unlock Dabao!";
+  // Auto Unlock
+  setTimeout(()=>{ unlockUI(); },800);
+}
+function importWallet(){
+  let m=document.getElementById('impMnemonic').value.trim();
+  let p=document.getElementById('pwd').value.trim();
+  if(!m || !p){ alert("12 Word + Password Dono Daalo!"); return; }
+  try{ let w=ethers.Wallet.fromMnemonic(m); currentMnemonic=m; currentWallet=w; currentPassword=p; unlockUI(); }
+  catch(e){ alert("Galat 12 Word! "+e.message); }
+}
+function unlockUI(){
+  document.getElementById('lockCard').style.display='none';
+  document.getElementById('mainCard').style.display='block';
+  document.getElementById('myAddr').innerText=currentWallet.address;
+  fetchRealBalance(); fetchPrices();
+}
+function lockWallet(){ currentWallet=null; location.reload(); }
+function showMnemonic(){
+  let b=document.getElementById('backupBox');
+  b.style.display='block'; b.innerText=currentMnemonic||"Pehle Wallet Banao!";
+}
+
+// ===== PRICE + BALANCE - TESTNET =====
+async function fetchPrices(){
+  try{
+    let r=await fetch("https://api.coingecko.com/api/v3/simple/price?ids=bitcoin,ethereum&vs_currencies=usd");
+    let j=await r.json();
+    document.getElementById('btcPrice').innerText="$"+j.bitcoin.usd.toLocaleString();
+    document.getElementById('ethPrice').innerText="$"+j.ethereum.usd.toLocaleString();
+    window.ethUsd=j.ethereum.usd;
+  }catch(e){ document.getElementById('btcPrice').innerText="Offline"; document.getElementById('ethPrice').innerText="Offline"; }
+}
+async function fetchRealBalance(){
+  if(!currentWallet) return;
+  try{
+    let provider=new ethers.providers.JsonRpcProvider("https://eth-sepolia.public.blastapi.io");
+    let bal=await provider.getBalance(currentWallet.address);
+    let eth=ethers.utils.formatEther(bal);
+    document.getElementById('myBal').innerText=parseFloat(eth).toFixed(4)+" Sepolia ETH";
+    document.getElementById('myBalUsd').innerText="≈ $"+(parseFloat(eth)*(window.ethUsd||3000)).toFixed(2)+" | Sepolia Testnet | Faucet: sepoliafaucet.com";
+  }catch(e){ document.getElementById('myBal').innerText="Balance Load Fail - Net Check Karo"; }
+}
+
+// ===== HYBRID SIGN - ECDSA REAL + FALCON WASM REAL TRY =====
+async function hybridSignReal(message){
+  let ecdsaSig=await currentWallet.signMessage(message);
+  let ecdsaAddr=ethers.utils.verifyMessage(message, ecdsaSig);
+  let falconSig="", falconIsReal=false, falconPub="";
+  try{
+    if(falconWasmReady && falconWasm){
+      if(!falconWasmKeypair){
+        if(falconWasm.Falcon512) falconWasmKeypair=falconWasm.Falcon512.keypair();
+        else if(falconWasm.Falcon_512) falconWasmKeypair=falconWasm.Falcon_512.keypair();
+        else if(falconWasm.keypair) falconWasmKeypair=falconWasm.keypair("Falcon-512");
+      }
+      if(falconWasmKeypair){
+        let sigBytes=null;
+        if(falconWasm.Falcon512) sigBytes=falconWasm.Falcon512.sign(new TextEncoder().encode(message), falconWasmKeypair.secretKey||falconWasmKeypair.privateKey);
+        else if(falconWasm.sign) sigBytes=falconWasm.sign(message, falconWasmKeypair.secretKey);
+        if(sigBytes){
+          let hex=Array.from(sigBytes).map(b=>b.toString(16).padStart(2,'0')).join('');
+          falconSig="FALCON512-WASM-REAL:"+hex; falconIsReal=true;
+          let pub=falconWasmKeypair.publicKey||falconWasmKeypair.public_key;
+          if(pub) falconPub=Array.from(pub).map(b=>b.toString(16).padStart(2,'0')).join('');
+        }
+      }
+    }
+  }catch(e){ console.log("WASM Sign Fail:",e.message); falconIsReal=false; }
+  if(!falconIsReal){
+    let h=ethers.utils.keccak256(ethers.utils.toUtf8Bytes(message+ecdsaSig+Date.now()));
+    falconSig="FALCON512-DEMO:"+h.slice(2)+":"+ecdsaSig.slice(2,66);
+    falconPub="DEMO-PUB:"+h.slice(2,66);
+  }
+  return {message, ecdsaSig, ecdsaAddr, falconSig, falconIsReal, falconPub, falconType: falconIsReal ? "REAL WASM ✅" : "DEMO ⚠️ - WASM Fail - Backup Chala"};
+}
+async function testHybrid(){
+  if(!currentWallet){ alert("Pehle Wallet Banao!"); return; }
+  let msg="QTRUST TEST "+Date.now();
+  let hyb=await hybridSignReal(msg);
+  document.getElementById('audit').innerText="=== HYBRID TEST ===\nMsg: "+msg+"\nECDSA: "+hyb.ecdsaSig+"\nECDSA Addr: "+hyb.ecdsaAddr+"\nFALCON: "+hyb.falconSig.slice(0,150)+"...\nFALCON TYPE: "+hyb.falconType+"\nFALCON REAL? "+(hyb.falconIsReal?"✅ HAAN - WASM REAL!":"⚠️ NAHI - DEMO");
+  alert("Test Ho Gaya!\nFalcon: "+hyb.falconType);
+}
+
+// ===== TESTNET SEND - REAL - GitHub Pe Hi! =====
+async function sendTestnetETH(){
+  try{
+    let to=document.getElementById('toAddr').value.trim();
+    let amt=document.getElementById('sendAmt').value.trim();
+    if(!to||!amt){ alert("To Address + Amount Daalo!"); return; }
+    if(!currentWallet){ alert("Pehle Wallet Unlock Karo!"); return; }
+    let provider=new ethers.providers.JsonRpcProvider("https://eth-sepolia.public.blastapi.io");
+    let walletWithProvider=currentWallet.connect(provider);
+    let bal=await provider.getBalance(currentWallet.address);
+    let balEth=ethers.utils.formatEther(bal);
+    if(parseFloat(balEth)<parseFloat(amt)){
+      alert("Testnet Me Paisa Kam Hai!\nTere Paas: "+balEth+" Sepolia ETH\nFaucet Se Free Le Lo: https://sepoliafaucet.com\nTera Address: "+currentWallet.address);
+      return;
+    }
+    if(!confirm("TESTNET SEND?\n"+amt+" Sepolia ETH -> "+to+"\nYe Real Paisa Nahi Hai - Test Hai!")) return;
+    document.getElementById('sendResult').innerText="Testnet Pe Bhej Raha Hu... Ruko 10 Sec...";
+    let tx=await walletWithProvider.sendTransaction({to:to, value:ethers.utils.parseEther(amt)});
+    let msg="TESTNET SEND "+amt+" ETH to "+to+" Tx: "+tx.hash;
+    let hyb=await hybridSignReal(msg);
+    document.getElementById('sendResult').innerHTML="✅ TESTNET SEND HO GAYA!<br>Tx: "+tx.hash+"<br><a href='https://sepolia.etherscan.io/tx/"+tx.hash+"' target='_blank' style='color:#f5d67b'>Etherscan Pe Dekho!</a>";
+    document.getElementById('audit').innerText="=== TESTNET AUDIT ===\nTx: "+tx.hash+"\nFrom: "+currentWallet.address+"\nTo: "+to+"\nAmount: "+amt+" Sepolia ETH\nECDSA: "+hyb.ecdsaSig+"\nFALCON: "+hyb.falconSig.slice(0,150)+"...\nFALCON TYPE: "+hyb.falconType+"\nExplorer: https://sepolia.etherscan.io/tx/"+tx.hash;
+    alert("✅ HO GAYA SANDEEP!\nTx: "+tx.hash);
+    fetchRealBalance();
+  }catch(e){ alert("❌ Fail: "+e.message); document.getElementById('sendResult').innerText="❌ Fail: "+e.message; }
+}
 </script>
 </body>
 </html>
